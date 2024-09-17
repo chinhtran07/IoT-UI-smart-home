@@ -1,7 +1,8 @@
 import React, { createContext, ReactNode, useContext, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { AppDispatch, RootState } from '@/store/store';
-import { loginAsync, logoutAsync, checkTokenAsync } from '@/store/slices/authSlice';
+import { AppDispatch, RootState } from '../store/store';
+import { loginAsync, logoutAsync, checkTokenAsync } from '../store/slices/authSlice';
+import { setAuthToken } from '../services/authService';
 
 interface AuthContextType {
     token: string | null;
@@ -25,10 +26,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Hàm đăng nhập
     const handleLogin = async (email: string, password: string) => {
         try {
-            console.log(email, password);
-            await dispatch(loginAsync({ email, password })).unwrap();
+             await dispatch(loginAsync({ email, password })).unwrap();
         } catch (error) {
-            throw error;
+            console.error('Login failed:', error);
         }
     };
 

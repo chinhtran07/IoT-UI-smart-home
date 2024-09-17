@@ -1,4 +1,4 @@
-import { API_BASE_URL, API_CONFIG } from '@/configs/apiConfig';
+import { API_BASE_URL, API_CONFIG } from '../configs/apiConfig';
 import axios from 'axios';
 import { getAuthToken } from './authService';
 

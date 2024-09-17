@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-import { setAuthToken, removeAuthToken, getAuthToken, getTokenExpiry, setTokenExpiry, isTokenExpired } from '@/services/authService';
-import apiClient from "@/services/apiService";
-import { API_ENDPOINTS } from "@/configs/apiConfig"; 
+import { setAuthToken, removeAuthToken, getAuthToken, getTokenExpiry, setTokenExpiry, isTokenExpired } from '../../services/authService';
+import apiClient from "../../services/apiService";
+import { API_ENDPOINTS } from "../../configs/apiConfig"; 
 
 // Khai báo giao diện cho trạng thái auth
 interface AuthState {
@@ -21,7 +21,6 @@ export const loginAsync = createAsyncThunk(
     'auth/loginAsync',
     async ({ email, password }: { email: string; password: string }, { dispatch }) => {
         const response = await apiClient.post(API_ENDPOINTS.LOGIN, { email, password });
-        
         const data = response.data;
         const accessToken = data.access_token;
         const refreshToken = data.refresh_token;
