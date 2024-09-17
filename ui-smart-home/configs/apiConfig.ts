@@ -1,4 +1,4 @@
-export const API_BASE_URL = "http://localhost:3000/api";
+export const API_BASE_URL = "https://ea3a-171-243-48-85.ngrok-free.app/api";
 
 export const API_ENDPOINTS = {
     LOGIN: `${API_BASE_URL}/auth/login`,
@@ -10,5 +10,5 @@ export const API_CONFIG = {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     },
-    timeout: 5000, 
+    timeout: 10000, 
 }

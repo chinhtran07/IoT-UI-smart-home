@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Tabs } from "expo-router";
-import TabBarIcon from "../../components/navigation/TabBarIcon";
+import TabBarIcon from "@/components/navigation/TabBarIcon";
 
 const TabLayout = () => {
     return (
@@ -12,11 +12,10 @@ const TabLayout = () => {
               backgroundColor: '#49708F', 
               paddingHorizontal: 10, 
               marginHorizontal: 20,
-              marginBottom: 10,
-              minHeight: 60,
               borderRadius: 20,
               overflow: 'hidden',
-              borderTopWidth: 0
+              borderTopWidth: 0,
+              marginBottom: 10
             },
             tabBarLabelStyle: {
               fontSize: 12, 
@@ -78,7 +77,8 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: '#354F63', 
-      borderTopWidth: 0
+      borderTopWidth: 0,
+      paddingTop: 35
     },
   });
 
