@@ -6,7 +6,11 @@
       "@/*": [
         "./*"
       ]
-    }
+    },"plugins": [
+      {
+        "name": "babel-plugin-dotenv-import"
+      }
+    ]
   },
   "include": [
     "**/*.ts",
