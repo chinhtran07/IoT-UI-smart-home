@@ -46,7 +46,7 @@ const LoginScreen: React.FC = () => {
     return (
         <View style={styles.container}>
             <View style={styles.content}>
-                <Image source={require("@/assets/images/splash.png")} style={styles.logo} />
+                <Image source={require("@/assets/images/react-logo.png")} style={styles.logo} />
                 <Text style={styles.title}>Welcome Back!</Text>
                 <TextInput
                     label="Email"
@@ -91,6 +91,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f5f5f5',
+        paddingTop: 50,
+        position: "relative",
+        bottom: 150
     },
     content: {
         flex: 1,

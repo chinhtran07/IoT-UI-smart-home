@@ -13,7 +13,7 @@ const Header = () => {
     const toggleLeftMenu = () => setLeftMenuVisible(!leftMenuVisible);
 
     const goToAddDevice = () => {
-        router.replace('/devices/addDevice');
+        router.replace('/(tabs)/groups/addDevice');
         toggleMenu();
     };
 
@@ -80,7 +80,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
         borderBottomColor: '#ccc',
         position: 'relative',
-        zIndex: 10,  // Ensure the header stays above other components
+        zIndex: 10,
+        marginTop: 30
     },
     leftContainer: {
         flexDirection: 'row',
