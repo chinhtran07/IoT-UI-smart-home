@@ -27,30 +27,33 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   card: {
-    borderRadius: 10, // Consistent border radius
-    aspectRatio: 1, // Maintain square aspect ratio
-    backgroundColor: 'rgba(0, 0, 0, 0.6)', // Similar background to CustomCard
+    borderRadius: 10, 
+    aspectRatio: 1,
+    backgroundColor: 'rgba(255,255,255, 0.2)', 
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
   iconWrapper: {
-    backgroundColor: 'rgba(0, 0, 0, 0.8)', // Darker background for icon
-    borderRadius: 30, // Rounded icon container
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', 
+    borderRadius: 30, 
     padding: 10,
     position: 'absolute',
-    top: 10,
-    left: 10,
+    bottom: 40,
+    // left: 10,
   },
   cardContent: {
-    justifyContent: 'center', // Center content
-    alignItems: 'center', // Center content
+    bottom: -60, 
+    alignItems: 'center', 
     padding: 10,
+    right: 20
+    
   },
   text: {
-    color: 'white', // Consistent text color
-    fontSize: 18,
+    color: 'white', 
+    fontSize: 20,
     textAlign: 'center',
+    fontWeight: "700"
   },
 });
 

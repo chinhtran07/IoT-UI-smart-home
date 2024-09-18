@@ -20,7 +20,7 @@ const initialState: AuthState = {
 export const loginAsync = createAsyncThunk(
     'auth/loginAsync',
     async ({ email, password }: { email: string; password: string }, { dispatch }) => {
-        const response = await apiClient.post(API_ENDPOINTS.LOGIN, { email, password });
+        const response = await apiClient.post(API_ENDPOINTS.login, { email, password });
         
         const data = response.data;
         const accessToken = data.access_token;
@@ -30,7 +30,7 @@ export const loginAsync = createAsyncThunk(
         if (accessToken && refreshToken && expireIn) {
             await setAuthToken(accessToken, refreshToken);
             await setTokenExpiry(expireIn);
-            const userResponse = await apiClient.get(API_ENDPOINTS.CURRENT_USER);
+            const userResponse = await apiClient.get(API_ENDPOINTS.current_user);
             const user = userResponse.data;
 
             // Dispatch login action để cập nhật Redux state
@@ -54,7 +54,7 @@ export const checkTokenAsync = createAsyncThunk('auth/checkTokenAsync', async (_
     const expired = await isTokenExpired();
 
     if (token && !expired) {
-        const userResponse = await apiClient.get(API_ENDPOINTS.CURRENT_USER);
+        const userResponse = await apiClient.get(API_ENDPOINTS.current_user);
         const user = userResponse.data;
         dispatch(login({ token, user }));
     } else {

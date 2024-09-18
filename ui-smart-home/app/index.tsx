@@ -18,18 +18,17 @@ export default function SplashScreenComponent() {
         const token = await getAuthToken();
         const expired = await isTokenExpired();
 
-        console.log(`Token: ${token}, Expired: ${expired}`);
 
         setTimeout(async () => {
           if (token && !expired) {
-            router.replace("/(tabs)"); // Redirect to the main app if the token is valid
+            router.replace("/(tabs)"); 
           } else {
-            router.replace("/login"); // Redirect to login if the token is invalid or expired
+            router.replace("/login"); 
           }
 
-          // Hide splash screen after navigating
+
           await SplashScreen.hideAsync();
-        }, 1000); // Adjust the delay as needed
+        }, 1000);
       } catch (error) {
         console.error("Error checking authentication:", error);
         await SplashScreen.hideAsync(); // Ensure splash screen is hidden even if there's an error

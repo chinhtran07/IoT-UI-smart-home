@@ -1,28 +1,30 @@
 import React from "react";
 import { useState } from "react";
-import { StyleSheet, TouchableOpacity, View, Image } from "react-native";
+import { StyleSheet, TouchableOpacity, View, Image, StyleProp, ViewStyle } from "react-native";
 import { Card, Paragraph, Title } from 'react-native-paper';
 
 type CustomCardProps = {
-  image?: string;
-  title?: string;
-  paragraph?: string;
+    image?: string;
+    title?: string;
+    paragraph?: string;
+    style: StyleProp<ViewStyle>;
 };
 
-const CustomCard: React.FC<CustomCardProps> = ({ 
-  image, 
-  title = "Card Title", 
-  paragraph = "This is a description of the card." 
+const CustomCard: React.FC<CustomCardProps> = ({
+    image,
+    title = "Card Title",
+    paragraph = "This is a description of the card.",
+    style
 }) => {
     const [isActive, setIsActive] = useState(false);
 
     return (
-        <TouchableOpacity style={styles.container} onPress={() => setIsActive(!isActive)}>
+        <TouchableOpacity style={[styles.container, style]} onPress={() => setIsActive(!isActive)}>
             <Card style={[styles.card, { backgroundColor: isActive ? 'white' : 'rgba(0, 0, 0, 0.6)' }]}>
                 {image && (
-                  <View style={styles.imageContainer}>
-                    <Image source={{ uri: image }} style={styles.image} />
-                  </View>
+                    <View style={styles.imageContainer}>
+                        <Image source={{ uri: image }} style={styles.image} />
+                    </View>
                 )}
                 <Card.Content style={styles.cardContent}>
                     <Title style={[styles.title, { color: isActive ? 'black' : 'white' }]}>{title}</Title>

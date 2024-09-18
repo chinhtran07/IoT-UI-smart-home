@@ -1,8 +1,9 @@
-export const API_BASE_URL = "https://ea3a-171-243-48-85.ngrok-free.app/api";
+export const API_BASE_URL = "https://genuine-apparent-blowfish.ngrok-free.app/api";
 
 export const API_ENDPOINTS = {
-    LOGIN: `${API_BASE_URL}/auth/login`,
-    CURRENT_USER: `${API_BASE_URL}/users/me`
+    login: `${API_BASE_URL}/auth/login`,
+    refresh_token: `${API_BASE_URL}/auth/refresh-token` ,
+    current_user: `${API_BASE_URL}/users/me`
 }
 
 export const API_CONFIG = {
