@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, View, Dimensions } from 'react-native';
 import CustomCard from '@/components/CustomCard';
 import Header from '@/components/home/Headers';
 import AddDeviceCard from '@/components/home/AddDeviceCard'; // Ensure correct import
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Index() {
   const [devices, setDevices] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -18,7 +19,7 @@ export default function Index() {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Header />
       <FlatList
         data={devices}
@@ -28,7 +29,7 @@ export default function Index() {
         ListEmptyComponent={<AddDeviceCard />}
         contentContainerStyle={styles.deviceListContainer}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

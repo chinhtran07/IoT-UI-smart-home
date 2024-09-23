@@ -17,6 +17,11 @@ const Header = () => {
         toggleMenu();
     };
 
+    const goToAddGroup = () => {
+        router.replace('/(tabs)/groups/addGroup');
+        toggleMenu();
+    }
+
     return (
         <View style={styles.container}>
             {/* Left Content */}
@@ -44,7 +49,7 @@ const Header = () => {
                         <Text style={styles.menuText}>Add Device</Text>
                     </TouchableOpacity>
                     <View style={{ borderWidth: 1 }} />
-                    <TouchableOpacity style={styles.menuItem} onPress={toggleMenu}>
+                    <TouchableOpacity style={styles.menuItem} onPress={() => goToAddGroup()}>
                         <Text style={styles.menuText}>Add group</Text>
                     </TouchableOpacity>
                     <View style={{ borderWidth: 1 }} />
@@ -81,7 +86,6 @@ const styles = StyleSheet.create({
         borderBottomColor: '#ccc',
         position: 'relative',
         zIndex: 10,
-        marginTop: 30
     },
     leftContainer: {
         flexDirection: 'row',

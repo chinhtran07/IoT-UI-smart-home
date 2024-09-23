@@ -1,6 +1,9 @@
 import React from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { View, Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
 import CustomCard from "@/components/CustomCard"; // Đảm bảo đường dẫn chính xác
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router"; // Sử dụng useRouter từ expo-router
+import { Ionicons } from '@expo/vector-icons'; // Import icon
 
 interface Group {
   id: string;
@@ -29,8 +32,23 @@ const GroupItem: React.FC<GroupItemProps> = ({ group }) => (
 );
 
 const GroupListScreen: React.FC = () => {
+  const router = useRouter();
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <View></View>
+        <Text style={styles.headerTitle}>Groups</Text>
+        <TouchableOpacity
+          onPress={() => {
+            router.push("/(tabs)/groups/addGroup");
+          }}
+          style={styles.addButton}
+        >
+          <Ionicons name="add-circle" size={24} color="black" />
+        </TouchableOpacity>
+      </View>
+      
       <FlatList
         data={groupData}
         keyExtractor={(item) => item.id}
@@ -38,7 +56,7 @@ const GroupListScreen: React.FC = () => {
         renderItem={({ item }) => <GroupItem group={item} />}
         contentContainerStyle={styles.listContainer}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -46,10 +64,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 50, // Điều chỉnh chiều cao nếu cần
+    paddingHorizontal: 15,
+    backgroundColor: '#f5f5f5', // Màu nền header
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  backButton: {
+    padding: 5,
+  },
+  addButton: {
+    padding: 5,
   },
   listContainer: {
-    paddingBottom: 20,
+    padding: 20,
   },
   card: {
     marginBottom: 15,

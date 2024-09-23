@@ -3,7 +3,7 @@ import axios from 'axios';
 import { getAuthToken } from './authService';
 
 const apiClient = axios.create({
-  baseURL: API_BASE_URL, // Add your API base URL here
+  baseURL: API_BASE_URL, 
   ...API_CONFIG
 });
 
@@ -29,7 +29,6 @@ export const fetchData = async (endpoint: string) => {
   }
 };
 
-// Example API call: POST request
 export const postData = async (endpoint: string, data: any) => {
   try {
     const response = await apiClient.post(endpoint, data);
@@ -40,7 +39,6 @@ export const postData = async (endpoint: string, data: any) => {
   }
 };
 
-// Example API call: PUT request
 export const updateData = async (endpoint: string, data: any) => {
   try {
     const response = await apiClient.put(endpoint, data);
@@ -51,7 +49,6 @@ export const updateData = async (endpoint: string, data: any) => {
   }
 };
 
-// Example API call: DELETE request
 export const deleteData = async (endpoint: string) => {
   try {
     const response = await apiClient.delete(endpoint);
