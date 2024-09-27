@@ -11,7 +11,8 @@ const TabLayout = () => {
   useEffect(() => {
     setIsIndexScreen(pathName === "/");
     // Chỉ hiển thị tab bar nếu không ở màn hình addDevice hoặc addGroup
-    setShowTabBars(pathName !== "/groups/addDevice" && pathName !== "/groups/addGroup");
+    setShowTabBars(
+      !["/groups/addDevice", "/groups/addGroup", "/groups/scanner"].includes(pathName));
   }, [pathName]);
 
   return (
@@ -88,6 +89,13 @@ const TabLayout = () => {
         />
         <Tabs.Screen
           name="groups/addGroup"
+          options={{
+            headerShown: false,
+            href: null
+          }}
+        />
+        <Tabs.Screen
+          name="groups/scanner"
           options={{
             headerShown: false,
             href: null
