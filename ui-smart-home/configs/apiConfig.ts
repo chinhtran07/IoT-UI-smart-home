@@ -1,4 +1,4 @@
-export const API_BASE_URL = "https://genuine-apparent-blowfish.ngrok-free.app/api";
+export const API_BASE_URL = "https://strong-complete-sculpin.ngrok-free.app/api";
 
 export const API_ENDPOINTS = {
     login: `${API_BASE_URL}/auth/login`,

@@ -10,7 +10,6 @@ const TabLayout = () => {
 
   useEffect(() => {
     setIsIndexScreen(pathName === "/");
-    // Chỉ hiển thị tab bar nếu không ở màn hình addDevice hoặc addGroup
     setShowTabBars(
       !["/groups/addDevice", "/groups/addGroup", "/groups/scanner"].includes(pathName));
   }, [pathName]);
@@ -18,6 +17,7 @@ const TabLayout = () => {
   return (
     <View style={[styles.container, { backgroundColor: isIndexScreen ? '#354F63' : "#fff" }]}>
       <Tabs
+        initialRouteName="index"
         screenOptions={{
           tabBarStyle: {
             display: isShowTabBars ? "flex" : "none",
@@ -28,7 +28,6 @@ const TabLayout = () => {
             overflow: 'hidden',
             borderTopWidth: 0,
             marginBottom: 10,
-            paddingBottom: 20
           },
           tabBarLabelStyle: {
             fontSize: 12,
@@ -51,7 +50,7 @@ const TabLayout = () => {
           }}
         />
         <Tabs.Screen
-          name="groups/index"
+          name="groups"
           options={{
             tabBarLabel: "Groups",
             tabBarIcon: ({ color, size }) => (
@@ -78,27 +77,6 @@ const TabLayout = () => {
               <TabBarIcon name="person-outline" color={color} size={size} />
             ),
             headerShown: false,
-          }}
-        />
-        <Tabs.Screen
-          name="groups/addDevice"
-          options={{
-            headerShown: false,
-            href: null
-          }}
-        />
-        <Tabs.Screen
-          name="groups/addGroup"
-          options={{
-            headerShown: false,
-            href: null
-          }}
-        />
-        <Tabs.Screen
-          name="groups/scanner"
-          options={{
-            headerShown: false,
-            href: null
           }}
         />
       </Tabs>

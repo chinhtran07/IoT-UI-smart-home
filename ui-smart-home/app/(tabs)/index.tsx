@@ -5,6 +5,9 @@ import Header from '@/components/home/Headers';
 import AddDeviceCard from '@/components/home/AddDeviceCard'; // Ensure correct import
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+const { width } = Dimensions.get('window');
+const cardWidth = (width - 40) / 2; // Dynamically calculate width for two columns
+
 export default function Index() {
   const [devices, setDevices] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
@@ -14,7 +17,7 @@ export default function Index() {
       image="assets/images/favicon.png"
       title={`Device ${index + 1}`}
       paragraph="Device description"
-      style={{ zIndex: -1 }}
+      style={{ width: cardWidth, margin: 10 }} // Set width and margin
     />
   );
 
@@ -25,7 +28,7 @@ export default function Index() {
         data={devices}
         renderItem={renderDevice}
         keyExtractor={(item, index) => index.toString()}
-        numColumns={2}  // Hiển thị 2 thiết bị trên mỗi hàng
+        numColumns={2} 
         ListEmptyComponent={<AddDeviceCard />}
         contentContainerStyle={styles.deviceListContainer}
       />
@@ -33,16 +36,13 @@ export default function Index() {
   );
 }
 
-const { width } = Dimensions.get('window');
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#354F63',
-    zIndex: 999,
   },
   deviceListContainer: {
     padding: 10,
-    zIndex: 999,
+    paddingBottom: 20,
   },
 });

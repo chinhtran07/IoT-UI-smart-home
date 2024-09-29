@@ -3,8 +3,6 @@ import { StyleSheet, View, Alert, Image, ActivityIndicator } from 'react-native'
 import { TextInput, Button, Text } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
-import apiClient from '@/services/apiService';
-import { API_ENDPOINTS } from '@/configs/apiConfig';
 
 const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validatePassword = (password: string): boolean => password.length >= 6;

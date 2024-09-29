@@ -1,27 +1,85 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Modal, FlatList, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { AntDesign } from "@expo/vector-icons";
+import { Searchbar, Button as PaperButton, TextInput } from "react-native-paper"; // Import Button from React Native Paper
+import * as ImagePicker from 'expo-image-picker';
 
 const availableDevices = [
-  { id: '1', name: 'Device 1' },
-  { id: '2', name: 'Device 2' },
-  { id: '3', name: 'Device 3' },
-  { id: '4', name: 'Device 4' },
+  { id: '1', name: 'Device 1', description: 'Description for Device 1', image: 'https://example.com/device1.png' },
+  { id: '2', name: 'Device 2', description: 'Description for Device 2', image: 'https://example.com/device2.png' },
+  { id: '3', name: 'Device 3', description: 'Description for Device 3', image: 'https://example.com/device3.png' },
+  { id: '4', name: 'Device 4', description: 'Description for Device 4', image: 'https://example.com/device4.png' },
+  { id: '5', name: 'Device 5', description: 'Description for Device 5', image: 'https://example.com/device5.png' },
+  { id: '6', name: 'Device 6', description: 'Description for Device 6', image: 'https://example.com/device6.png' },
+  // Add more devices as needed
 ];
+
+interface Device {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+}
+
+interface DeviceItemProps {
+  device: Device;
+  isSelected: boolean;
+  onSelect: () => void;
+}
+
+const DeviceItem: React.FC<DeviceItemProps> = ({ device, isSelected, onSelect }) => (
+  <TouchableOpacity
+    style={[styles.deviceItem, isSelected && styles.selectedDevice]}
+    onPress={onSelect}
+  >
+    <View style={styles.deviceContent}>
+      <Image source={{ uri: device.image }} style={styles.deviceImage} />
+      <View style={styles.deviceInfo}>
+        <Text style={styles.deviceName}>{device.name}</Text>
+        <Text style={styles.deviceDescription}>{device.description}</Text>
+      </View>
+    </View>
+  </TouchableOpacity>
+);
 
 const AddGroupDeviceScreen: React.FC = () => {
   const [groupName, setGroupName] = useState("");
-  const [isModalVisible, setModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedDevices, setSelectedDevices] = useState<string[]>([]);
+  const [groupImage, setGroupImage] = useState<string | null>(null);
+  const [filteredDevices, setFilteredDevices] = useState<Device[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
   const router = useRouter();
 
-  const handleConfirm = () => {
-    setModalVisible(true);
+  const ITEMS_PER_PAGE = 2;
+
+  // Function to load devices
+  const loadDevices = () => {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+    setTimeout(() => {
+      const newDevices = availableDevices.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+      if (newDevices.length === 0) {
+        setHasMore(false);
+      } else {
+        setFilteredDevices((prev) => [...prev, ...newDevices]);
+        setPage((prev) => prev + 1);
+      }
+      setLoading(false);
+    }, 1000);
   };
 
+  useEffect(() => {
+    loadDevices();
+  }, []);
+
   const handleDeviceSelect = (deviceId: string) => {
-    setSelectedDevices((prev) => 
+    setSelectedDevices((prev) =>
       prev.includes(deviceId) ? prev.filter(id => id !== deviceId) : [...prev, deviceId]
     );
   };
@@ -29,47 +87,95 @@ const AddGroupDeviceScreen: React.FC = () => {
   const handleSave = () => {
     console.log("Group Name:", groupName);
     console.log("Selected Devices:", selectedDevices);
+    console.log("Group Image:", groupImage);
     router.back();
+  };
+
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      alert("Permission to access camera roll is required!");
+      return;
+    }
+
+    const result: ImagePicker.ImagePickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setGroupImage(result.assets[0].uri);
+    }
+  };
+
+  const handleSearchQueryChange = (query: string) => {
+    setSearchQuery(query);
+    setFilteredDevices([]);
+    setPage(0);
+    setHasMore(true);
+    if (query) {
+      const filtered = availableDevices.filter(device =>
+        device.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredDevices(filtered.slice(0, ITEMS_PER_PAGE));
+    } else {
+      setFilteredDevices([]);
+      loadDevices();
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header tùy chỉnh */}
       <View style={styles.header}>
-        <Text style={styles.backButton} onPress={() => router.back()}>
-          ←
-        </Text>
+        <TouchableOpacity onPress={() => router.back()}>
+          <AntDesign name="left" size={24} color="black" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Add Group Device</Text>
       </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Group Name"
-        value={groupName}
-        onChangeText={setGroupName}
+      <View style={styles.inputContainer}>
+        <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
+          {groupImage ? (
+            <Image source={{ uri: groupImage }} style={styles.image} />
+          ) : (
+            <Text style={styles.imagePlaceholder}>Select Icon</Text>
+          )}
+        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Group Name"
+          value={groupName}
+          onChangeText={setGroupName}
+        />
+      </View>
+
+      <Searchbar
+        placeholder="Search devices..."
+        onChangeText={handleSearchQueryChange}
+        value={searchQuery}
+        style={styles.searchBar}
       />
 
-      <Button title="Confirm" onPress={handleConfirm} />
-
-      <Modal visible={isModalVisible} animationType="slide">
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Select Devices</Text>
-          <FlatList
-            data={availableDevices}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[styles.deviceItem, selectedDevices.includes(item.id) && styles.selectedDevice]}
-                onPress={() => handleDeviceSelect(item.id)}
-              >
-                <Text>{item.name}</Text>
-              </TouchableOpacity>
-            )}
+      <FlatList
+        data={filteredDevices}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <DeviceItem
+            device={item}
+            isSelected={selectedDevices.includes(item.id)}
+            onSelect={() => handleDeviceSelect(item.id)}
           />
-          <Button title="Save Group" onPress={handleSave} />
-          <Button title="Cancel" onPress={() => setModalVisible(false)} />
-        </View>
-      </Modal>
+        )}
+        onEndReached={loadDevices}
+        onEndReachedThreshold={0.1}
+        ListFooterComponent={loading ? <ActivityIndicator size="small" color="#0000ff" /> : null}
+      />
+
+      <PaperButton mode="contained" onPress={handleSave} style={styles.saveButton}>
+        Save Group
+      </PaperButton>
     </SafeAreaView>
   );
 };
@@ -82,43 +188,85 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-      alignItems: 'center',
+    alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 20,
   },
-  backButton: {
-    fontSize: 24,
-    marginRight: 10,
-  },
   headerTitle: {
     fontSize: 20,
-      fontWeight: 'bold',
-      flex: 1,
-    textAlign: 'center'
+    fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
   },
   input: {
+    flex: 1,
+    height: 50,
+    paddingHorizontal: 10,
+  },
+  imagePicker: {
+    width: 50,
     height: 50,
     borderColor: '#ccc',
     borderWidth: 1,
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 5,
+  },
+  imagePlaceholder: {
+    color: '#aaa',
+    textAlign: 'center',
+  },
+  searchBar: {
     marginBottom: 15,
-    paddingHorizontal: 10,
-  },
-  modalContainer: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  modalTitle: {
-    fontSize: 20,
-    marginBottom: 10,
   },
   deviceItem: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    flex: 1,
+    margin: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deviceContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  deviceImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  deviceInfo: {
+    flex: 1,
+  },
+  deviceName: {
+    fontWeight: 'bold',
+  },
+  deviceDescription: {
+    color: '#777',
   },
   selectedDevice: {
     backgroundColor: '#e0e0e0',
+  },
+  saveButton: {
+    marginTop: 20,
   },
 });
 
