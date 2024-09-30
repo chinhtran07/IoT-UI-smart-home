@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Tabs, usePathname } from "expo-router";
 import TabBarIcon from "@/components/navigation/TabBarIcon";
+import  Colors  from '@/constants/Colors'; // Nhập màu sắc
 
 const TabLayout = () => {
   const pathName = usePathname();
@@ -15,13 +16,12 @@ const TabLayout = () => {
   }, [pathName]);
 
   return (
-    <View style={[styles.container, { backgroundColor: isIndexScreen ? '#354F63' : "#fff" }]}>
+    <View style={[styles.container]}>
       <Tabs
         initialRouteName="index"
         screenOptions={{
           tabBarStyle: {
             display: isShowTabBars ? "flex" : "none",
-            backgroundColor: '#49708F',
             paddingHorizontal: 10,
             marginHorizontal: 20,
             borderRadius: 20,
@@ -36,8 +36,8 @@ const TabLayout = () => {
           tabBarIconStyle: {
             marginBottom: 0,
           },
-          tabBarActiveTintColor: '#ffffff',
-          tabBarInactiveTintColor: '#d0d0d0'
+          tabBarActiveTintColor: Colors.light.tabIconSelected, // Màu khi tab được chọn
+          tabBarInactiveTintColor: Colors.light.tabIconDefault // Màu khi tab không được chọn
         }}>
         <Tabs.Screen
           name="index"

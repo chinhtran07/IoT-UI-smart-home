@@ -4,23 +4,45 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { useState } from "react";
 import React from "react";
 import { router } from "expo-router";
+import  Colors  from '@/constants/Colors'; // Nhập màu sắc
 
 const Header = () => {
     const [menuVisible, setMenuVisible] = useState(false);
     const [leftMenuVisible, setLeftMenuVisible] = useState(false);
 
-    const toggleMenu = () => setMenuVisible(!menuVisible);
-    const toggleLeftMenu = () => setLeftMenuVisible(!leftMenuVisible);
+    const toggleMenu = () => {
+        // Nếu menu chính đang mở thì đóng nó, nếu không thì đóng menu bên trái
+        setMenuVisible(prev => {
+            if (prev) {
+                return false; // Đóng menu chính nếu đang mở
+            } else {
+                setLeftMenuVisible(false); // Đóng menu bên trái
+                return true; // Mở menu chính
+            }
+        });
+    };
+
+    const toggleLeftMenu = () => {
+        // Nếu menu bên trái đang mở thì đóng nó, nếu không thì đóng menu chính
+        setLeftMenuVisible(prev => {
+            if (prev) {
+                return false; // Đóng menu bên trái nếu đang mở
+            } else {
+                setMenuVisible(false); // Đóng menu chính
+                return true; // Mở menu bên trái
+            }
+        });
+    };
 
     const goToAddDevice = () => {
         router.replace('/(tabs)/groups/addDevice');
-        toggleMenu();
+        toggleMenu(); // Đóng menu chính sau khi chọn
     };
 
     const goToAddGroup = () => {
         router.replace('/(tabs)/groups/addGroup');
-        toggleMenu();
-    }
+        toggleMenu(); // Đóng menu chính sau khi chọn
+    };
 
     return (
         <View style={styles.container}>
@@ -28,29 +50,29 @@ const Header = () => {
             <TouchableOpacity style={styles.leftContainer} onPress={toggleLeftMenu}>
                 <View style={styles.leftContent}>
                     <Text style={styles.title}>My Home</Text>
-                    <Ionicons name="caret-down" size={15} color="white" />
+                    <Ionicons name="caret-down" size={15} color={Colors.light.icon} />
                 </View>
             </TouchableOpacity>
 
             {/* Right Icons */}
             <View style={styles.rightIcon}>
                 <TouchableOpacity style={styles.iconButton} onPress={toggleMenu}>
-                    <Ionicons name="add-sharp" size={24} color="#fff" />
+                    <Ionicons name="add-sharp" size={24} color={Colors.light.icon} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.iconButton}>
-                    <AntDesign name="appstore-o" size={24} color="#fff" />
+                    <AntDesign name="appstore-o" size={24} color={Colors.light.icon} />
                 </TouchableOpacity>
             </View>
 
             {/* Menu - visible when menuVisible is true */}
             {menuVisible && (
                 <View style={styles.menu}>
-                    <TouchableOpacity style={styles.menuItem} onPress={() => goToAddDevice()}>
+                    <TouchableOpacity style={styles.menuItem} onPress={goToAddDevice}>
                         <Text style={styles.menuText}>Add Device</Text>
                     </TouchableOpacity>
                     <View style={{ borderWidth: 1 }} />
-                    <TouchableOpacity style={styles.menuItem} onPress={() => goToAddGroup()}>
-                        <Text style={styles.menuText}>Add group</Text>
+                    <TouchableOpacity style={styles.menuItem} onPress={goToAddGroup}>
+                        <Text style={styles.menuText}>Add Group</Text>
                     </TouchableOpacity>
                     <View style={{ borderWidth: 1 }} />
                     <TouchableOpacity style={styles.menuItem} onPress={toggleMenu}>
@@ -82,8 +104,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 15,
-        backgroundColor: 'transparent',
-        borderBottomColor: '#ccc',
+        backgroundColor: Colors.light.background,
+        borderBottomColor: Colors.light.icon,
         position: 'relative',
         zIndex: 10,
     },
@@ -97,7 +119,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 18,
-        color: '#fff',
+        color: Colors.light.text,
         marginRight: 5,
     },
     rightIcon: {
@@ -109,18 +131,18 @@ const styles = StyleSheet.create({
     // Menu styles
     menu: {
         position: 'absolute',
-        right: 20, // Align menu under "+" icon
-        top: 60, // Position under header
+        right: 20,
+        top: 60,
         backgroundColor: '#fff',
         borderRadius: 8,
         padding: 10,
-        elevation: 5, // Add shadow for Android
-        zIndex: 2000, // Ensure the menu is on top
+        elevation: 5,
+        zIndex: 2000,
     },
     leftMenu: {
         position: 'absolute',
-        left: 15, // Positioning it under "My Home"
-        top: 60, // Positioned under header
+        left: 15,
+        top: 60,
         backgroundColor: '#fff',
         borderRadius: 8,
         padding: 10,
@@ -132,7 +154,7 @@ const styles = StyleSheet.create({
     },
     menuText: {
         fontSize: 16,
-        color: '#000',
+        color: Colors.light.text,
     },
 });
 

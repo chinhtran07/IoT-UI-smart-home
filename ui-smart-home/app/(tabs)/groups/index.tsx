@@ -1,14 +1,15 @@
 import React from "react";
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router"; // Use useRouter from expo-router
-import { Ionicons } from '@expo/vector-icons'; // Import icon
+import { useRouter } from "expo-router";
+import { Ionicons } from '@expo/vector-icons';
+import  Colors  from "@/constants/Colors"; // Import Colors from the specified path
 
 interface Group {
   id: string;
   name: string;
   description: string;
-  image: string; // Add image property to Group interface
+  image: string;
 }
 
 const groupData: Group[] = [
@@ -20,7 +21,7 @@ const groupData: Group[] = [
 
 interface GroupItemProps {
   group: Group;
-  onPress: (id: string) => void; // Add onPress prop
+  onPress: (id: string) => void;
 }
 
 const GroupItem: React.FC<GroupItemProps> = ({ group, onPress }) => (
@@ -39,7 +40,7 @@ const GroupListScreen: React.FC = () => {
   const router = useRouter();
 
   const handleGroupPress = (id: string) => {
-    router.push(`/groups/${id}`); // Navigate to group detail screen
+    router.push(`/groups/${id}`);
   };
 
   return (
@@ -53,7 +54,7 @@ const GroupListScreen: React.FC = () => {
           }}
           style={styles.addButton}
         >
-          <Ionicons name="add-circle" size={24} color="black" />
+          <Ionicons name="add-circle" size={24} color={Colors.light.tint} />
         </TouchableOpacity>
       </View>
       
@@ -61,7 +62,7 @@ const GroupListScreen: React.FC = () => {
         data={groupData}
         keyExtractor={(item) => item.id}
         numColumns={1}
-        renderItem={({ item }) => <GroupItem group={item} onPress={handleGroupPress} />} // Pass the onPress prop
+        renderItem={({ item }) => <GroupItem group={item} onPress={handleGroupPress} />}
         contentContainerStyle={styles.listContainer}
       />
     </SafeAreaView>
@@ -71,7 +72,7 @@ const GroupListScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.light.background, // Use background color from Colors
   },
   header: {
     flexDirection: 'row',
@@ -83,6 +84,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: Colors.light.text, // Updated header title color
   },
   addButton: {
     padding: 5,
@@ -92,7 +94,7 @@ const styles = StyleSheet.create({
   },
   card: {
     marginBottom: 15,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.light.background || '#fff', // Use a new property for card background if defined
     borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: {
@@ -109,20 +111,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   groupImage: {
-    width: 50, // Adjust the width as needed
-    height: 50, // Adjust the height as needed
-    borderRadius: 25, // To make it circular
-    marginRight: 10, // Space between image and text
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
   },
   groupInfo: {
-    flex: 1, // This will take remaining space
+    flex: 1,
   },
   groupName: {
     fontWeight: 'bold',
     fontSize: 16,
+    color: Colors.light.text, // Updated group name color
   },
   groupDescription: {
-    color: '#666',
+    color: Colors.light.icon || '#666', // Use icon color for description
     fontSize: 14,
   },
 });

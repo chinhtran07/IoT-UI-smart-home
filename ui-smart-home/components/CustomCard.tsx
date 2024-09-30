@@ -1,7 +1,7 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { StyleSheet, TouchableOpacity, View, Image, StyleProp, ViewStyle } from "react-native";
 import { Card, Paragraph, Title } from 'react-native-paper';
+import { Colors } from '@/constants/Colors'; // Adjust the import path as needed
 
 type CustomCardProps = {
     image?: string;
@@ -20,15 +20,15 @@ const CustomCard: React.FC<CustomCardProps> = ({
 
     return (
         <TouchableOpacity style={[styles.container, style]} onPress={() => setIsActive(!isActive)}>
-            <Card style={[styles.card, { backgroundColor: isActive ? 'white' : 'rgba(0, 0, 0, 0.6)' }]}>
+            <Card style={[styles.card, { backgroundColor: isActive ? Colors.light.background : 'rgba(0, 0, 0, 0.6)' }]}>
                 {image && (
                     <View style={styles.imageContainer}>
                         <Image source={{ uri: image }} style={styles.image} />
                     </View>
                 )}
                 <Card.Content style={styles.cardContent}>
-                    <Title style={[styles.title, { color: isActive ? 'black' : 'white' }]}>{title}</Title>
-                    <Paragraph style={[styles.paragraph, { color: isActive ? 'black' : 'white' }]}>
+                    <Title style={[styles.title, { color: isActive ? Colors.light.text : 'white' }]}>{title}</Title>
+                    <Paragraph style={[styles.paragraph, { color: isActive ? Colors.light.text : 'white' }]}>
                         {paragraph}
                     </Paragraph>
                 </Card.Content>
@@ -39,36 +39,36 @@ const CustomCard: React.FC<CustomCardProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        width: '50%', // Chiều rộng tương tự AddDeviceCard
+        width: '50%',
         padding: 10,
     },
     card: {
-        borderRadius: 10, // Bo góc
-        aspectRatio: 1, // Giữ card hình vuông
-        justifyContent: 'flex-end', // Căn nội dung xuống dưới
-        position: 'relative', // Để hình ảnh nằm ở vị trí chính xác
+        borderRadius: 10,
+        aspectRatio: 1, 
+        justifyContent: 'flex-end',
+        position: 'relative',
     },
     imageContainer: {
         position: 'absolute',
         top: -70,
         left: 10,
-        borderRadius: 20, // Bo tròn
+        borderRadius: 20,
         padding: 8,
     },
     image: {
-        width: 40, // Chiều rộng của hình ảnh
-        height: 40, // Chiều cao của hình ảnh
-        borderRadius: 12, // Bo tròn hình ảnh (trong trường hợp là hình tròn)
+        width: 40,
+        height: 40,
+        borderRadius: 12,
     },
     cardContent: {
-        justifyContent: 'flex-end', // Căn nội dung xuống cuối thẻ
-        paddingBottom: 20, // Khoảng cách với nút bên dưới
+        justifyContent: 'flex-end',
+        paddingBottom: 20,
     },
     title: {
-        color: 'white', // Màu chữ trắng khi nền đen
+        color: 'white', // Default to white for dark background
     },
     paragraph: {
-        color: 'white', // Màu chữ trắng khi nền đen
+        color: 'white', // Default to white for dark background
     },
 });
 

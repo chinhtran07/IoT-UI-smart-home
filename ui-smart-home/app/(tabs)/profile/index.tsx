@@ -3,9 +3,11 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from "react-na
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from "expo-router"; // Import useRouter
 
 const ProfileScreen: React.FC = () => {
   const { user, logout } = useAuth();
+  const router = useRouter(); // Initialize the router
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
@@ -13,6 +15,7 @@ const ProfileScreen: React.FC = () => {
       { text: "Logout", onPress: async () => {
           await logout();
           console.log("User logged out");
+          router.push("/login"); // Navigate to the login screen
         }},
     ]);
   };
