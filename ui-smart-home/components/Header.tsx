@@ -1,47 +1,46 @@
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import AntDesign from '@expo/vector-icons/AntDesign';
-import { useState } from "react";
-import React from "react";
-import { router } from "expo-router";
-import  Colors  from '@/constants/Colors'; // Nhập màu sắc
+import React, { useState } from "react";
+import Colors from '@/constants/Colors'; // Import colors
 
-const Header = () => {
+interface Header {
+    title: string;
+    leftMenuOptions: string[];
+    onLeftMenuSelect: (option: string) => void;
+    menuItems: { label: string; onPress: () => void }[];
+}
+
+const Header: React.FC<Header> = ({ title, leftMenuOptions, onLeftMenuSelect, menuItems }) => {
     const [menuVisible, setMenuVisible] = useState(false);
     const [leftMenuVisible, setLeftMenuVisible] = useState(false);
+    const [selectedOption, setSelectedOption] = useState(leftMenuOptions[0]);
 
     const toggleMenu = () => {
-        // Nếu menu chính đang mở thì đóng nó, nếu không thì đóng menu bên trái
         setMenuVisible(prev => {
             if (prev) {
-                return false; // Đóng menu chính nếu đang mở
+                return false; // Close main menu if open
             } else {
-                setLeftMenuVisible(false); // Đóng menu bên trái
-                return true; // Mở menu chính
+                setLeftMenuVisible(false); // Close left menu
+                return true; // Open main menu
             }
         });
     };
 
     const toggleLeftMenu = () => {
-        // Nếu menu bên trái đang mở thì đóng nó, nếu không thì đóng menu chính
         setLeftMenuVisible(prev => {
             if (prev) {
-                return false; // Đóng menu bên trái nếu đang mở
+                return false; // Close left menu if open
             } else {
-                setMenuVisible(false); // Đóng menu chính
-                return true; // Mở menu bên trái
+                setMenuVisible(false); // Close main menu
+                return true; // Open left menu
             }
         });
     };
 
-    const goToAddDevice = () => {
-        router.replace('/(tabs)/groups/addDevice');
-        toggleMenu(); // Đóng menu chính sau khi chọn
-    };
-
-    const goToAddGroup = () => {
-        router.replace('/(tabs)/groups/addGroup');
-        toggleMenu(); // Đóng menu chính sau khi chọn
+    const changeOption = (option: string) => {
+        setSelectedOption(option);
+        setLeftMenuVisible(false);
+        onLeftMenuSelect(option); // Call the provided function when an option is selected
     };
 
     return (
@@ -49,7 +48,7 @@ const Header = () => {
             {/* Left Content */}
             <TouchableOpacity style={styles.leftContainer} onPress={toggleLeftMenu}>
                 <View style={styles.leftContent}>
-                    <Text style={styles.title}>My Home</Text>
+                    <Text style={styles.title}>{selectedOption}</Text>
                     <Ionicons name="caret-down" size={15} color={Colors.light.icon} />
                 </View>
             </TouchableOpacity>
@@ -59,39 +58,27 @@ const Header = () => {
                 <TouchableOpacity style={styles.iconButton} onPress={toggleMenu}>
                     <Ionicons name="add-sharp" size={24} color={Colors.light.icon} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.iconButton}>
-                    <AntDesign name="appstore-o" size={24} color={Colors.light.icon} />
-                </TouchableOpacity>
             </View>
 
             {/* Menu - visible when menuVisible is true */}
             {menuVisible && (
                 <View style={styles.menu}>
-                    <TouchableOpacity style={styles.menuItem} onPress={goToAddDevice}>
-                        <Text style={styles.menuText}>Add Device</Text>
-                    </TouchableOpacity>
-                    <View style={{ borderWidth: 1 }} />
-                    <TouchableOpacity style={styles.menuItem} onPress={goToAddGroup}>
-                        <Text style={styles.menuText}>Add Group</Text>
-                    </TouchableOpacity>
-                    <View style={{ borderWidth: 1 }} />
-                    <TouchableOpacity style={styles.menuItem} onPress={toggleMenu}>
-                        <Text style={styles.menuText}>Add Automation</Text>
-                    </TouchableOpacity>
+                    {menuItems.map((item, index) => (
+                        <TouchableOpacity key={index} style={styles.menuItem} onPress={() => { item.onPress(); toggleMenu() }}>
+                            <Text style={styles.menuText}>{item.label}</Text>
+                        </TouchableOpacity>
+                    ))}
                 </View>
             )}
 
+            {/* Left Menu - visible when leftMenuVisible is true */}
             {leftMenuVisible && (
                 <View style={styles.leftMenu}>
-                    <TouchableOpacity style={styles.menuItem} onPress={toggleLeftMenu}>
-                        <Text style={styles.menuText}>Home 1</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.menuItem} onPress={toggleLeftMenu}>
-                        <Text style={styles.menuText}>Home 2</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.menuItem} onPress={toggleLeftMenu}>
-                        <Text style={styles.menuText}>Home 3</Text>
-                    </TouchableOpacity>
+                    {leftMenuOptions.map((option, index) => (
+                        <TouchableOpacity key={index} style={styles.menuItem} onPress={() => changeOption(option)}>
+                            <Text style={styles.menuText}>{option}</Text>
+                        </TouchableOpacity>
+                    ))}
                 </View>
             )}
         </View>
@@ -128,7 +115,6 @@ const styles = StyleSheet.create({
     iconButton: {
         marginLeft: 15,
     },
-    // Menu styles
     menu: {
         position: 'absolute',
         right: 20,

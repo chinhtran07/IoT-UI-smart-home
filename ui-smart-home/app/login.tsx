@@ -4,10 +4,15 @@ import { TextInput, Button, Text } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/Colors';
+import Colors from '@/constants/Colors';
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
 
 const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validatePassword = (password: string): boolean => password.length >= 6;
+
+WebBrowser.maybeCompleteAuthSession();
+
 
 const LoginScreen: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -42,6 +47,48 @@ const LoginScreen: React.FC = () => {
             setLoading(false); // Stop loading
         }
     };
+
+    // const handleLoginGoogle = async () => {
+    //     const redirectUri = Google.
+
+    //     const result = await AuthSession.startAsync({
+    //         authUrl: `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=email%20profile`,
+    //     });
+
+    //     if (result.type === 'success') {
+    //         const { access_token } = result.params;
+
+    //         // Send the token to your backend to authenticate
+    //         try {
+    //             setLoading(true);
+    //             const response = await fetch('YOUR_BACKEND_URL/api/auth/google/callback', {
+    //                 method: 'GET',
+    //                 headers: {
+    //                     Authorization: `Bearer ${access_token}`,
+    //                 },
+    //             });
+
+    //             if (!response.ok) {
+    //                 throw new Error('Failed to login');
+    //             }
+
+    //             const data = await response.json();
+    //             // Handle token and refresh token as needed
+    //             console.log(data);
+    //             // Navigate to your main application screen
+    //             router.replace('/(tabs)');
+    //         } catch (error) {
+    //             console.error(error);
+    //             Alert.alert('Login Error', 'An error occurred during login. Please try again.');
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     } else {
+    //         Alert.alert('Login Cancelled', 'You cancelled the login process.');
+    //     }
+    // };
+
+
 
     return (
         <SafeAreaView style={styles.container}>

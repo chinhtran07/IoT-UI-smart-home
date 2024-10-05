@@ -2,15 +2,13 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Tabs, usePathname } from "expo-router";
 import TabBarIcon from "@/components/navigation/TabBarIcon";
-import  Colors  from '@/constants/Colors'; // Nhập màu sắc
+import  Colors  from '@/constants/Colors'; 
 
 const TabLayout = () => {
   const pathName = usePathname();
-  const [isIndexScreen, setIsIndexScreen] = useState(true);
   const [isShowTabBars, setShowTabBars] = useState(true);
 
   useEffect(() => {
-    setIsIndexScreen(pathName === "/");
     setShowTabBars(
       !["/groups/addDevice", "/groups/addGroup", "/groups/scanner"].includes(pathName));
   }, [pathName]);
@@ -60,7 +58,7 @@ const TabLayout = () => {
           }}
         />
         <Tabs.Screen
-          name="automations/index"
+          name="automations"
           options={{
             tabBarLabel: "Automations",
             tabBarIcon: ({ color, size }) => (

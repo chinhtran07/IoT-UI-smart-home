@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { AntDesign } from "@expo/vector-icons";
-import { Searchbar, Button as PaperButton, TextInput } from "react-native-paper"; // Import Button from React Native Paper
+import { Searchbar, Button as PaperButton, TextInput } from "react-native-paper";
 import * as ImagePicker from 'expo-image-picker';
 
 const availableDevices = [
@@ -13,7 +11,6 @@ const availableDevices = [
   { id: '4', name: 'Device 4', description: 'Description for Device 4', image: 'https://example.com/device4.png' },
   { id: '5', name: 'Device 5', description: 'Description for Device 5', image: 'https://example.com/device5.png' },
   { id: '6', name: 'Device 6', description: 'Description for Device 6', image: 'https://example.com/device6.png' },
-  // Add more devices as needed
 ];
 
 interface Device {
@@ -57,7 +54,7 @@ const AddGroupDeviceScreen: React.FC = () => {
 
   const ITEMS_PER_PAGE = 2;
 
-  // Function to load devices
+  // Load devices function
   const loadDevices = () => {
     if (loading || !hasMore) return;
 
@@ -127,14 +124,7 @@ const AddGroupDeviceScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <AntDesign name="left" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add Group Device</Text>
-      </View>
-
+    <View style={styles.container}>
       <View style={styles.inputContainer}>
         <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
           {groupImage ? (
@@ -171,12 +161,14 @@ const AddGroupDeviceScreen: React.FC = () => {
         onEndReached={loadDevices}
         onEndReachedThreshold={0.1}
         ListFooterComponent={loading ? <ActivityIndicator size="small" color="#0000ff" /> : null}
+        style={styles.deviceList}
+        contentContainerStyle={filteredDevices.length === 0 ? styles.emptyList : undefined}
       />
 
       <PaperButton mode="contained" onPress={handleSave} style={styles.saveButton}>
         Save Group
       </PaperButton>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -184,27 +176,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'center',
+    paddingBottom: 20, // Adjust padding to prevent overlapping with the bottom button
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 15,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
+    paddingHorizontal: 20,
+    paddingTop: 10,
   },
   input: {
     flex: 1,
@@ -232,10 +211,19 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     marginBottom: 15,
+    marginHorizontal: 20,
+  },
+  deviceList: {
+    flex: 1,
+    marginHorizontal: 20,
+  },
+  emptyList: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   deviceItem: {
     flex: 1,
-    margin: 5,
+    marginVertical: 5,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
@@ -266,8 +254,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0e0e0',
   },
   saveButton: {
-    marginTop: 20,
-  },
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
+  }
 });
 
 export default AddGroupDeviceScreen;

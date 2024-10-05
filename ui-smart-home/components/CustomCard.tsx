@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, TouchableOpacity, View, Image, StyleProp, ViewStyle } from "react-native";
 import { Card, Paragraph, Title } from 'react-native-paper';
-import { Colors } from '@/constants/Colors'; // Adjust the import path as needed
+import  Colors  from '@/constants/Colors'; // Adjust the import path as needed
 
 type CustomCardProps = {
     image?: string;

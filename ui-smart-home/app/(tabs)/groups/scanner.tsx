@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Camera, CameraView } from "expo-camera";
+import { CameraView } from "expo-camera";
 import { Stack, useRouter } from "expo-router";
 import { useEffect, useRef } from "react";
 import { AppState, Linking, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
