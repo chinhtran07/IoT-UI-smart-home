@@ -68,27 +68,13 @@ const TabLayout = () => {
           }}
         />
         <Tabs.Screen
-          name="profile/index"
+          name="profile"
           options={{
             tabBarLabel: "Profile",
             tabBarIcon: ({ color, size }) => (
               <TabBarIcon name="person-outline" color={color} size={size} />
             ),
             headerShown: false,
-          }}
-        />
-         <Tabs.Screen
-          name="devices"
-          options={{
-            href: null,
-            headerShown: false
-          }}
-        />
-        <Tabs.Screen
-          name="scenes/addScene"
-          options={{
-            href: null,
-            headerShown: false
           }}
         />
       </Tabs>

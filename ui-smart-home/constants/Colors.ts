@@ -33,6 +33,9 @@ const Colors = {
     deviceDescription: '#ccc',
     saveButton: '#fff',
   },
+  headerBackground: {
+    color: "#94D9F1"
+  }
 };
 
 export default Colors;

@@ -39,12 +39,12 @@ export default function AddDeviceScreen() {
     if (!isPermissionGranted) {
       const { status } = await requestPermission();
       if (status === 'granted') {
-        router.push("/(tabs)/devices/scanner"); // Navigate to scanner if permission is granted
+        router.push("/(devices)/scanner"); // Navigate to scanner if permission is granted
       } else {
         alert("Camera permission is required to scan QR codes.");
       }
     } else {
-      router.push("/(tabs)/devices/scanner"); // Navigate to scanner if permission is already granted
+      router.push("/(devices)/scanner"); // Navigate to scanner if permission is already granted
     }
   };
 

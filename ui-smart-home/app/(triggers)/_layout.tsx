@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 
-export default function RootLayout() {
+export default function TriggerLayout() {
+
 
     return (
         <Stack initialRouteName="index">

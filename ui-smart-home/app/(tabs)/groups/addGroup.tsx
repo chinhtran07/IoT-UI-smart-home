@@ -228,6 +228,7 @@ const styles = StyleSheet.create({
   },
   appBarTitle: {
     color: "white",
+    textAlign: "center"
   },
   inputContainer: {
     flexDirection: "row",

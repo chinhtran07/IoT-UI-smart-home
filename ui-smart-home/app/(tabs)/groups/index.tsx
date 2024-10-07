@@ -1,14 +1,13 @@
 import React, { useState, useCallback } from "react";
 import {
   View,
-  Text,
-  TouchableOpacity,
   FlatList,
   StyleSheet,
   Image,
+  TouchableOpacity,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
+import { Appbar, Text } from "react-native-paper";
 import { Ionicons } from '@expo/vector-icons';
 import Colors from "@/constants/Colors"; // Import Colors from the specified path
 import apiClient from "@/services/apiService";
@@ -17,7 +16,7 @@ import { API_ENDPOINTS } from "@/configs/apiConfig";
 interface Group {
   _id: string;
   name: string;
-  image: string;
+  icon: string;
 }
 
 interface GroupItemProps {
@@ -28,7 +27,7 @@ interface GroupItemProps {
 const GroupItem: React.FC<GroupItemProps> = ({ group, onPress }) => (
   <TouchableOpacity onPress={() => onPress(group._id)} style={styles.card}>
     <View style={styles.groupItem}>
-      <Image source={{ uri: group.image }} style={styles.groupImage} />
+      <Image source={{ uri: group.icon }} style={styles.groupImage} />
       <View style={styles.groupInfo}>
         <Text style={styles.groupName}>{group.name}</Text>
       </View>
@@ -64,16 +63,14 @@ const GroupListScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Groups</Text>
-        <TouchableOpacity
+    <View style={styles.container}>
+      <Appbar.Header style={styles.appBar}>
+        <Appbar.Content title="Groups" titleStyle={styles.appBarTitle} />
+        <Appbar.Action
+          icon={() => <Ionicons name="add-circle" size={24} color={Colors.light.tint} />}
           onPress={() => router.push("/(tabs)/groups/addGroup")}
-          style={styles.addButton}
-        >
-          <Ionicons name="add-circle" size={24} color={Colors.light.tint} />
-        </TouchableOpacity>
-      </View>
+        />
+      </Appbar.Header>
 
       <FlatList
         data={groups}
@@ -83,7 +80,7 @@ const GroupListScreen: React.FC = () => {
         )}
         contentContainerStyle={styles.listContainer}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -92,20 +89,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.light.background,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: 50, 
-    paddingHorizontal: 15,
+  appBar: {
+    backgroundColor: '#94D9F1', // Set a default color if needed
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  appBarTitle: {
     color: Colors.light.text,
-  },
-  addButton: {
-    padding: 5,
   },
   listContainer: {
     padding: 20,

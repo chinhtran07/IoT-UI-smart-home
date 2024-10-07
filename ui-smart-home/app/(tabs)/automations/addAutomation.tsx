@@ -1,6 +1,8 @@
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView } from 'react-native';
 import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
+import { Appbar } from 'react-native-paper'; // Import Appbar
 
 const mockData = {
   ifConditions: [
@@ -17,6 +19,7 @@ const AddAutomationScreen = () => {
   const [executedOnce, setExecutedOnce] = useState(false);
   const [ifConditions, setIfConditions] = useState(mockData.ifConditions);
   const [thenActions, setThenActions] = useState(mockData.thenActions);
+  const route = useRouter();
 
   const handleToggle = () => setExecutedOnce(!executedOnce);
 
@@ -60,6 +63,10 @@ const AddAutomationScreen = () => {
 
   return (
     <GestureHandlerRootView style={styles.container}>
+      <Appbar.Header>
+      <Appbar.BackAction onPress={() => route.back()}  />
+        <Appbar.Content title="Add Automation" />
+      </Appbar.Header>
       <ScrollView contentContainerStyle={styles.scrollView}>
         {/* IF Section */}
         <View style={[styles.card, { borderColor: '#4285F4' }]}>

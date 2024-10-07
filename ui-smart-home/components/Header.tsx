@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 15,
-        backgroundColor: Colors.light.background,
+        backgroundColor: Colors.headerBackground.color,
         borderBottomColor: Colors.light.icon,
         position: 'relative',
         zIndex: 10,

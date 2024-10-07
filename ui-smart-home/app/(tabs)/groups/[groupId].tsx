@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
+import { Appbar } from "react-native-paper"; // Import Appbar
 import apiClient from "@/services/apiService";
 import { API_ENDPOINTS } from "@/configs/apiConfig";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import Colors from "@/constants/Colors";
 
 // Define the structure of each group
 interface Group {
@@ -15,6 +17,7 @@ interface Group {
 const GroupDetailScreen: React.FC = () => {
   const [group, setGroup] = useState<Group | null>(null); // Initialize as null
   const { groupId } = useLocalSearchParams();
+  const router = useRouter(); // Initialize router
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,9 +50,13 @@ const GroupDetailScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <Appbar.Header style={{ backgroundColor: Colors.headerBackground.color }}>
+        <Appbar.BackAction onPress={() => router.back()} /> 
+        <Appbar.Content title={group.name} />
+      </Appbar.Header>
+
       <Image source={{ uri: group.icon }} style={styles.groupImage} />
       <Text style={styles.groupName}>{group.name}</Text>
-      {/* Add more group details here if needed */}
     </View>
   );
 };
@@ -57,9 +64,6 @@ const GroupDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
     backgroundColor: "#f5f5f5",
   },
   groupImage: {
@@ -67,11 +71,14 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     marginBottom: 20,
+    alignSelf: "center", // Center the image
+    marginTop: 20, // Add margin top for spacing
   },
   groupName: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 10,
+    textAlign: "center", // Center the text
   },
   errorText: {
     fontSize: 18,
