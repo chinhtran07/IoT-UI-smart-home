@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { loginAsync, logoutAsync, checkTokenAsync } from '@/store/slices/authSlice';
 
+// Define the shape of the Auth context
 interface AuthContextType {
     token: string | null;
     user: any | null;
@@ -18,21 +19,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const { token, user, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
     useEffect(() => {
-        // Kiểm tra token khi ứng dụng khởi động
+        // Check token when the app starts
         dispatch(checkTokenAsync());
     }, [dispatch]);
 
-    // Hàm đăng nhập
+    // Login function
     const handleLogin = async (email: string, password: string) => {
         try {
-            console.log(email, password);
             await dispatch(loginAsync({ email, password })).unwrap();
         } catch (error) {
-            throw error;
+            console.error('Login failed:', error);
+            throw error; // Optionally, handle error more gracefully or show user feedback
         }
     };
 
-    // Hàm đăng xuất
+    // Logout function
     const handleLogout = async () => {
         try {
             await dispatch(logoutAsync()).unwrap();
@@ -48,6 +49,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
 };
 
+// Custom hook to use Auth context
 export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext);
     if (context === undefined) {

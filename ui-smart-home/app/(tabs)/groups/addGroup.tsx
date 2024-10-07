@@ -1,26 +1,31 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import { useRouter } from "expo-router";
-import { AntDesign } from "@expo/vector-icons";
-import { Searchbar, Button as PaperButton, TextInput } from "react-native-paper"; // Import Button from React Native Paper
-import * as ImagePicker from 'expo-image-picker';
-
-const availableDevices = [
-  { id: '1', name: 'Device 1', description: 'Description for Device 1', image: 'https://example.com/device1.png' },
-  { id: '2', name: 'Device 2', description: 'Description for Device 2', image: 'https://example.com/device2.png' },
-  { id: '3', name: 'Device 3', description: 'Description for Device 3', image: 'https://example.com/device3.png' },
-  { id: '4', name: 'Device 4', description: 'Description for Device 4', image: 'https://example.com/device4.png' },
-  { id: '5', name: 'Device 5', description: 'Description for Device 5', image: 'https://example.com/device5.png' },
-  { id: '6', name: 'Device 6', description: 'Description for Device 6', image: 'https://example.com/device6.png' },
-  // Add more devices as needed
-];
+import { Searchbar, Button as PaperButton, TextInput } from "react-native-paper";
+import * as ImagePicker from "expo-image-picker";
+import apiClient from "@/services/apiService";
+import { API_ENDPOINTS } from "@/configs/apiConfig";
 
 interface Device {
-  id: string;
+  _id: string;
   name: string;
-  description: string;
-  image: string;
+  status: string;
+  type: string;
+}
+
+interface ResponseData {
+  currentPage: number;
+  devices: Device[];
+  total: number;
+  totalPages: number;
 }
 
 interface DeviceItemProps {
@@ -35,10 +40,8 @@ const DeviceItem: React.FC<DeviceItemProps> = ({ device, isSelected, onSelect })
     onPress={onSelect}
   >
     <View style={styles.deviceContent}>
-      <Image source={{ uri: device.image }} style={styles.deviceImage} />
       <View style={styles.deviceInfo}>
         <Text style={styles.deviceName}>{device.name}</Text>
-        <Text style={styles.deviceDescription}>{device.description}</Text>
       </View>
     </View>
   </TouchableOpacity>
@@ -46,59 +49,111 @@ const DeviceItem: React.FC<DeviceItemProps> = ({ device, isSelected, onSelect })
 
 const AddGroupDeviceScreen: React.FC = () => {
   const [groupName, setGroupName] = useState("");
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [devices, setDevices] = useState<Device[]>([]);
   const [selectedDevices, setSelectedDevices] = useState<string[]>([]);
   const [groupImage, setGroupImage] = useState<string | null>(null);
   const [filteredDevices, setFilteredDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const router = useRouter();
 
-  const ITEMS_PER_PAGE = 2;
-
-  // Function to load devices
-  const loadDevices = () => {
+  const fetchDevices = useCallback(async (pageNum: number) => {
     if (loading || !hasMore) return;
 
     setLoading(true);
-    setTimeout(() => {
-      const newDevices = availableDevices.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
-      if (newDevices.length === 0) {
-        setHasMore(false);
+    try {
+      const res = await apiClient.get<ResponseData>(
+        `${API_ENDPOINTS.devices.by_owner}?page=${pageNum}`
+      );
+      if (res.status === 200) {
+        const { devices: newDevices, totalPages } = res.data;
+        setDevices((prevDevices) => [...prevDevices, ...newDevices]);
+        setHasMore(pageNum < totalPages);
       } else {
-        setFilteredDevices((prev) => [...prev, ...newDevices]);
-        setPage((prev) => prev + 1);
+        console.error("Failed to fetch devices");
       }
+    } catch (error) {
+      console.error("Error fetching devices:", error);
+    } finally {
       setLoading(false);
-    }, 1000);
-  };
+    }
+  }, [loading, hasMore]);
 
   useEffect(() => {
-    loadDevices();
-  }, []);
+    fetchDevices(page);
+  }, [page, fetchDevices]);
+
+  useEffect(() => {
+    setFilteredDevices(
+      searchQuery
+        ? devices.filter((device) =>
+            device.name.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : devices
+    );
+  }, [searchQuery, devices]);
 
   const handleDeviceSelect = (deviceId: string) => {
     setSelectedDevices((prev) =>
-      prev.includes(deviceId) ? prev.filter(id => id !== deviceId) : [...prev, deviceId]
+      prev.includes(deviceId)
+        ? prev.filter((id) => id !== deviceId)
+        : [...prev, deviceId]
     );
   };
 
-  const handleSave = () => {
-    console.log("Group Name:", groupName);
-    console.log("Selected Devices:", selectedDevices);
-    console.log("Group Image:", groupImage);
-    router.back();
+  const handleSave = async () => {
+    if (!groupName) {
+      alert("Please enter a group name.");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("name", groupName);
+      
+      if (groupImage) {
+        const fileType = groupImage.split(".").pop();
+        formData.append("icon", {
+          uri: groupImage,
+          name: `image-${groupName}.${fileType}`,
+          type: `image/${fileType}`,
+        } as any);
+      }
+
+      const createGroupResponse = await apiClient.post(API_ENDPOINTS.groups.create, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (createGroupResponse.status === 201) {
+        const groupId = createGroupResponse.data._id;
+
+        await apiClient.post(API_ENDPOINTS.groups.add_device(groupId), {
+          deviceIds: selectedDevices,
+        });
+
+        alert("Group created and devices added successfully!");
+        router.back();
+      } else {
+        alert("Failed to create group.");
+      }
+    } catch (error) {
+      console.error("Error adding group and devices:", error);
+      alert("An error occurred while saving the group.");
+    }
   };
 
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
+    if (!permissionResult.granted) {
       alert("Permission to access camera roll is required!");
       return;
     }
 
-    const result: ImagePicker.ImagePickerResult = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
@@ -110,31 +165,8 @@ const AddGroupDeviceScreen: React.FC = () => {
     }
   };
 
-  const handleSearchQueryChange = (query: string) => {
-    setSearchQuery(query);
-    setFilteredDevices([]);
-    setPage(0);
-    setHasMore(true);
-    if (query) {
-      const filtered = availableDevices.filter(device =>
-        device.name.toLowerCase().includes(query.toLowerCase())
-      );
-      setFilteredDevices(filtered.slice(0, ITEMS_PER_PAGE));
-    } else {
-      setFilteredDevices([]);
-      loadDevices();
-    }
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <AntDesign name="left" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add Group Device</Text>
-      </View>
-
+    <View style={styles.container}>
       <View style={styles.inputContainer}>
         <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
           {groupImage ? (
@@ -153,58 +185,47 @@ const AddGroupDeviceScreen: React.FC = () => {
 
       <Searchbar
         placeholder="Search devices..."
-        onChangeText={handleSearchQueryChange}
+        onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchBar}
       />
 
       <FlatList
         data={filteredDevices}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <DeviceItem
             device={item}
-            isSelected={selectedDevices.includes(item.id)}
-            onSelect={() => handleDeviceSelect(item.id)}
+            isSelected={selectedDevices.includes(item._id)}
+            onSelect={() => handleDeviceSelect(item._id)}
           />
         )}
-        onEndReached={loadDevices}
+        onEndReached={() => setPage((prev) => prev + 1)}
         onEndReachedThreshold={0.1}
         ListFooterComponent={loading ? <ActivityIndicator size="small" color="#0000ff" /> : null}
+        style={styles.deviceList}
+        contentContainerStyle={filteredDevices.length === 0 ? styles.emptyList : undefined}
       />
 
       <PaperButton mode="contained" onPress={handleSave} style={styles.saveButton}>
         Save Group
       </PaperButton>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'center',
+    backgroundColor: "#fff",
+    paddingBottom: 20,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 15,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
+    paddingHorizontal: 20,
+    paddingTop: 10,
   },
   input: {
     flex: 1,
@@ -214,38 +235,47 @@ const styles = StyleSheet.create({
   imagePicker: {
     width: 50,
     height: 50,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 10,
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: 5,
   },
   imagePlaceholder: {
-    color: '#aaa',
-    textAlign: 'center',
+    color: "#aaa",
+    textAlign: "center",
   },
   searchBar: {
     marginBottom: 15,
+    marginHorizontal: 20,
+  },
+  deviceList: {
+    flex: 1,
+    marginHorizontal: 20,
+  },
+  emptyList: {
+    flexGrow: 1,
+    justifyContent: "center",
   },
   deviceItem: {
     flex: 1,
-    margin: 5,
+    marginVertical: 5,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
     padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   deviceContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   deviceImage: {
     width: 50,
@@ -257,16 +287,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   deviceName: {
-    fontWeight: 'bold',
-  },
-  deviceDescription: {
-    color: '#777',
+    fontSize: 16,
   },
   selectedDevice: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: "#e0f7fa",
   },
   saveButton: {
-    marginTop: 20,
+    marginHorizontal: 20,
+    marginBottom: 10,
   },
 });
 

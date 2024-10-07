@@ -1,54 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import { useRoute } from "@react-navigation/native"; // Import useRoute
-
-// Define the shape of your route parameters
-type RouteParams = {
-  groupId: string; // groupId should be a string
-};
+import apiClient from "@/services/apiService";
+import { API_ENDPOINTS } from "@/configs/apiConfig";
+import { useLocalSearchParams } from "expo-router";
 
 // Define the structure of each group
 interface Group {
+  _id: string;
   name: string;
-  description: string;
-  image: string;
+  icon: string;
+  devices: any[];
 }
 
-// Define the structure of groupData with an index signature
-type GroupData = {
-  [key: string]: Group; // This allows for dynamic keys
-};
-
-// Dummy data for demonstration
-const groupData: GroupData = {
-  "1": {
-    name: "Group 1",
-    description: "Description for group 1",
-    image: "https://via.placeholder.com/100",
-  },
-  "2": {
-    name: "Group 2",
-    description: "Description for group 2",
-    image: "https://via.placeholder.com/100",
-  },
-  "3": {
-    name: "Group 3",
-    description: "Description for group 3",
-    image: "https://via.placeholder.com/100",
-  },
-  "4": {
-    name: "Group 4",
-    description: "Description for group 4",
-    image: "https://via.placeholder.com/100",
-  },
-};
-
 const GroupDetailScreen: React.FC = () => {
-  const route = useRoute();
-  const { groupId } = route.params as RouteParams; // Cast route.params to RouteParams
+  const [group, setGroup] = useState<Group | null>(null); // Initialize as null
+  const { groupId } = useLocalSearchParams();
 
-  // Retrieve group data based on groupId
-  const group = groupData[groupId];
+  useEffect(() => {
+    const fetchData = async () => {
+      if (Array.isArray(groupId)) {
+        console.error("groupId is an array:", groupId);
+        return;
+      }
+      try {
+        const res = await apiClient.get(API_ENDPOINTS.groups.detailed(groupId));
+        if (res.status === 200) {
+          setGroup(res.data);
+        }
+      } catch (error) {
+        console.error("Error fetching group data:", error);
+        setGroup(null); // Set group to null if there's an error
+      }
+    };
+
+    fetchData(); // Call fetchData here
+  }, [groupId]); // Add groupId as a dependency
 
   // If group is not found, show an error message
   if (!group) {
@@ -61,9 +47,9 @@ const GroupDetailScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Image source={{ uri: group.image }} style={styles.groupImage} />
+      <Image source={{ uri: group.icon }} style={styles.groupImage} />
       <Text style={styles.groupName}>{group.name}</Text>
-      <Text style={styles.groupDescription}>{group.description}</Text>
+      {/* Add more group details here if needed */}
     </View>
   );
 };
@@ -86,11 +72,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 10,
-  },
-  groupDescription: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
   },
   errorText: {
     fontSize: 18,

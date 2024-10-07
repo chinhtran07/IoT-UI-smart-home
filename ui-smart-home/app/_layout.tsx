@@ -1,8 +1,6 @@
 import { AuthProvider } from "@/context/AuthContext";
-import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from "react";
 import { Provider as ReduxProvider } from 'react-redux';
 import { store } from '@/store/store'; // Đảm bảo bạn đã tạo Redux store ở đâu đó
 

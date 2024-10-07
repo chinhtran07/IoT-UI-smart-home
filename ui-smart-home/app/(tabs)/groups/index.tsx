@@ -1,35 +1,36 @@
-import React from "react";
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Image } from "react-native";
+import React, { useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  Image,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router"; // Use useRouter from expo-router
-import { Ionicons } from '@expo/vector-icons'; // Import icon
+import { useFocusEffect, useRouter } from "expo-router";
+import { Ionicons } from '@expo/vector-icons';
+import Colors from "@/constants/Colors"; // Import Colors from the specified path
+import apiClient from "@/services/apiService";
+import { API_ENDPOINTS } from "@/configs/apiConfig";
 
 interface Group {
-  id: string;
+  _id: string;
   name: string;
-  description: string;
-  image: string; // Add image property to Group interface
+  image: string;
 }
-
-const groupData: Group[] = [
-  { id: '1', name: 'Group 1', description: 'Description for group 1', image: 'https://via.placeholder.com/100' },
-  { id: '2', name: 'Group 2', description: 'Description for group 2', image: 'https://via.placeholder.com/100' },
-  { id: '3', name: 'Group 3', description: 'Description for group 3', image: 'https://via.placeholder.com/100' },
-  { id: '4', name: 'Group 4', description: 'Description for group 4', image: 'https://via.placeholder.com/100' },
-];
 
 interface GroupItemProps {
   group: Group;
-  onPress: (id: string) => void; // Add onPress prop
+  onPress: (id: string) => void;
 }
 
 const GroupItem: React.FC<GroupItemProps> = ({ group, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(group.id)} style={styles.card}>
+  <TouchableOpacity onPress={() => onPress(group._id)} style={styles.card}>
     <View style={styles.groupItem}>
       <Image source={{ uri: group.image }} style={styles.groupImage} />
       <View style={styles.groupInfo}>
         <Text style={styles.groupName}>{group.name}</Text>
-        <Text style={styles.groupDescription}>{group.description}</Text>
       </View>
     </View>
   </TouchableOpacity>
@@ -37,31 +38,49 @@ const GroupItem: React.FC<GroupItemProps> = ({ group, onPress }) => (
 
 const GroupListScreen: React.FC = () => {
   const router = useRouter();
+  const [groups, setGroups] = useState<Group[]>([]);
+
+  // Fetch groups using useCallback
+  const fetchGroups = useCallback(async () => {
+    try {
+      const res = await apiClient.get(API_ENDPOINTS.groups.all_groups);
+      if (res.status === 200) {
+        setGroups(res.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch groups:", error);
+    }
+  }, []);
+
+  // useFocusEffect to fetch groups when the screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      fetchGroups();
+    }, [fetchGroups])
+  );
 
   const handleGroupPress = (id: string) => {
-    router.push(`/groups/${id}`); // Navigate to group detail screen
+    router.push(`/groups/${id}`);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <View></View>
         <Text style={styles.headerTitle}>Groups</Text>
         <TouchableOpacity
-          onPress={() => {
-            router.push("/(tabs)/groups/addGroup");
-          }}
+          onPress={() => router.push("/(tabs)/groups/addGroup")}
           style={styles.addButton}
         >
-          <Ionicons name="add-circle" size={24} color="black" />
+          <Ionicons name="add-circle" size={24} color={Colors.light.tint} />
         </TouchableOpacity>
       </View>
-      
+
       <FlatList
-        data={groupData}
-        keyExtractor={(item) => item.id}
-        numColumns={1}
-        renderItem={({ item }) => <GroupItem group={item} onPress={handleGroupPress} />} // Pass the onPress prop
+        data={groups}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => (
+          <GroupItem group={item} onPress={handleGroupPress} />
+        )}
         contentContainerStyle={styles.listContainer}
       />
     </SafeAreaView>
@@ -71,7 +90,7 @@ const GroupListScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.light.background,
   },
   header: {
     flexDirection: 'row',
@@ -83,6 +102,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: Colors.light.text,
   },
   addButton: {
     padding: 5,
@@ -92,7 +112,7 @@ const styles = StyleSheet.create({
   },
   card: {
     marginBottom: 15,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.light.background || '#fff',
     borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: {
@@ -109,21 +129,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   groupImage: {
-    width: 50, // Adjust the width as needed
-    height: 50, // Adjust the height as needed
-    borderRadius: 25, // To make it circular
-    marginRight: 10, // Space between image and text
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
   },
   groupInfo: {
-    flex: 1, // This will take remaining space
+    flex: 1,
   },
   groupName: {
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  groupDescription: {
-    color: '#666',
-    fontSize: 14,
+    color: Colors.light.text,
   },
 });
 
