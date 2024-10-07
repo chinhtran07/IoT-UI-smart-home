@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Searchbar, Button as PaperButton, TextInput } from "react-native-paper";
+import { Searchbar, Button as PaperButton, TextInput, Appbar } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import apiClient from "@/services/apiService";
 import { API_ENDPOINTS } from "@/configs/apiConfig";
@@ -40,9 +40,7 @@ const DeviceItem: React.FC<DeviceItemProps> = ({ device, isSelected, onSelect })
     onPress={onSelect}
   >
     <View style={styles.deviceContent}>
-      <View style={styles.deviceInfo}>
-        <Text style={styles.deviceName}>{device.name}</Text>
-      </View>
+      <Text style={styles.deviceName}>{device.name}</Text>
     </View>
   </TouchableOpacity>
 );
@@ -167,6 +165,11 @@ const AddGroupDeviceScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <Appbar.Header style={styles.appBar}>
+        <Appbar.BackAction onPress={() => router.back()} iconColor="white" />
+        <Appbar.Content titleStyle={styles.appBarTitle} title="Add Group" />
+      </Appbar.Header>
+
       <View style={styles.inputContainer}>
         <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
           {groupImage ? (
@@ -220,6 +223,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingBottom: 20,
   },
+  appBar: {
+    backgroundColor: "#94D9F1",
+  },
+  appBarTitle: {
+    color: "white",
+  },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -271,20 +280,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     alignItems: "center",
-    justifyContent: "center",
   },
   deviceContent: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  deviceImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 5,
-    marginRight: 10,
-  },
-  deviceInfo: {
-    flex: 1,
   },
   deviceName: {
     fontSize: 16,
