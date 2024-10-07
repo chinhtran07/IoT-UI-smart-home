@@ -25,7 +25,7 @@ const initialState: AuthState = {
 
 // Helper function to handle user fetching
 const fetchUser = async () => {
-  const userResponse = await apiClient.get(API_ENDPOINTS.current_user);
+  const userResponse = await apiClient.get(API_ENDPOINTS.users.current_user);
   return userResponse.data;
 };
 
@@ -33,7 +33,7 @@ const fetchUser = async () => {
 export const loginAsync = createAsyncThunk(
   "auth/loginAsync",
   async ({ email, password }: { email: string; password: string }, { dispatch }) => {
-    const { data } = await apiClient.post(API_ENDPOINTS.login, { email, password });
+    const { data } = await apiClient.post(API_ENDPOINTS.auth.login, { email, password });
     const { access_token: accessToken, refresh_token: refreshToken, expireIn } = data;
 
     if (accessToken && refreshToken && expireIn) {

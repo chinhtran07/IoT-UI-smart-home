@@ -26,7 +26,9 @@
       },
       "permissions": [
         "CAMERA",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ],
       "package": "com.ct.uismarthome"
     },
@@ -48,6 +50,11 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "6874f074-e0ba-419a-b9bf-f7690f3f444d"
+      }
     }
   }
 }

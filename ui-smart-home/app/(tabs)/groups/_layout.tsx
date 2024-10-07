@@ -1,9 +1,11 @@
+import { QRProvider } from "@/context/QrContext";
 import { Stack } from "expo-router";
 
 export default function RootLayout() {
 
 
   return (
+    <QRProvider>
     <Stack
       initialRouteName="index"
     >
@@ -20,6 +22,7 @@ export default function RootLayout() {
           headerBackTitleVisible: true,
         }}
       />
-    </Stack>
+      </Stack>
+      </QRProvider>
   );
 }

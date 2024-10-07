@@ -1,64 +1,102 @@
-import React, { useState } from 'react';
-import { FlatList, StyleSheet, View, Dimensions, Appearance } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { FlatList, StyleSheet, Dimensions, Appearance, ActivityIndicator } from 'react-native';
 import CustomCard from '@/components/CustomCard';
 import AddDeviceCard from '@/components/home/AddDeviceCard';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Colors from '@/constants/Colors'; // Ensure correct path to colors
-import ReusableHeader from '@/components/Header'; // Import the reusable header
+import Colors from '@/constants/Colors'; 
+import ReusableHeader from '@/components/Header';
 import { useRouter } from 'expo-router';
+import apiClient from '@/services/apiService';
+import { API_ENDPOINTS } from '@/configs/apiConfig';
+
+interface Device {
+  _id: string;
+}
+
+interface ResponseData {
+  currentPage: number;
+  devices: Device[];
+  total: number;
+  totalPages: number;
+}
 
 const { width } = Dimensions.get('window');
-const cardWidth = (width - 40) / 2; // Calculate width for two columns
+const cardWidth = (width - 40) / 2;
 
-export default function Index() {
-  const [devices, setDevices] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-  const colorScheme = Appearance.getColorScheme(); // Get current color scheme
-  const currentColors = colorScheme === 'dark' ? Colors.dark : Colors.light; // Choose corresponding colors
+const Index: React.FC = () => {
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const colorScheme = Appearance.getColorScheme(); 
   const router = useRouter();
 
-  const renderDevice = ({ item, index }: { item: number; index: number }) => (
+  const fetchDevices = useCallback(async (pageNum: number) => {
+    if (loading || !hasMore) return; // Prevent duplicate requests
+
+    setLoading(true);
+    try {
+      const res = await apiClient.get<ResponseData>(`${API_ENDPOINTS.devices.by_owner}?page=${pageNum}`);
+      if (res.status === 200) {
+        const { devices: newDevices, totalPages } = res.data; 
+        setDevices(prevDevices => [...prevDevices, ...newDevices]);
+        setHasMore(pageNum < totalPages); 
+      } else {
+        console.error("Failed to fetch devices");
+      }
+    } catch (error) {
+      console.error("Error fetching devices:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, hasMore]);
+
+  useEffect(() => {
+    fetchDevices(page);
+  }, [page, fetchDevices]);
+
+  const loadMoreDevices = () => {
+    if (!loading && hasMore) {
+      setPage(prevPage => prevPage + 1);
+    }
+  };
+
+  const renderDevice = ({ item }: { item: Device }) => (
     <CustomCard
-      key={index}
-      image="assets/images/favicon.png"
-      title={`Device ${index + 1}`}
-      paragraph="Device description"
-      style={{ width: cardWidth, margin: 10, backgroundColor: currentColors.background }} // Use color from colors file
+      key={item._id}
+      id={item._id}
+      style={{ width: cardWidth, margin: 10}} 
     />
   );
 
-  // Menu items for the reusable header
   const menuItems = [
     { label: "Add Device", onPress: () => router.replace('/(tabs)/groups/addDevice') },
     { label: "Add Group", onPress: () => router.replace('/(tabs)/groups/addGroup') },
     { label: "Add Automation", onPress: () => router.replace('/(tabs)/automations/addAutomation') },
   ];
 
-  const handleLeftMenuSelect = (option: string) => {
-    console.log(`Selected option: ${option}`);
-    // Implement your logic for handling left menu selection
-  };
-
-
-
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: Colors.light.background }]}>
       <ReusableHeader
         title="My Home"
-        leftMenuOptions={["Home 1", "Home 2", "Home 3"]} // Example left menu options
-        onLeftMenuSelect={handleLeftMenuSelect}
+        leftMenuOptions={["Home 1", "Home 2", "Home 3"]}
+        onLeftMenuSelect={option => console.log(`Selected option: ${option}`)}
         menuItems={menuItems}
       />
       <FlatList
         data={devices}
         renderItem={renderDevice}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={item => item._id} 
         numColumns={2} 
         ListEmptyComponent={<AddDeviceCard />}
         contentContainerStyle={styles.deviceListContainer}
+        onEndReached={loadMoreDevices}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={loading ? <ActivityIndicator size="large" color={Colors.dark.saveButton} /> : null}
       />
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -69,3 +107,5 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
 });
+
+export default Index;

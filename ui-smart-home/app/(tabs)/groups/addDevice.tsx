@@ -2,11 +2,37 @@ import { Stack, useRouter } from "expo-router";
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { useCameraPermissions } from "expo-camera";
 import { AntDesign } from '@expo/vector-icons'; // Import AntDesign for back button icon
+import { QRProvider, useQR } from "@/context/QrContext";
+import { useEffect } from "react";
+import axios from "axios";
 
 export default function AddDeviceScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const isPermissionGranted = permission?.granted;
   const router = useRouter();
+  const { qrData } = useQR();
+
+  useEffect(() => {
+    const sendWifi = async () => {
+      if (qrData) {
+        try {
+          const res = await axios.post(qrData, JSON.stringify({
+            ssid: "NT QUANG HANH B",
+            password: "79797979"
+          }), {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          console.log('Response:', res.data);
+        } catch (error) {
+          console.error('Error sending Wi-Fi data:', error);
+        }
+      }
+    };
+
+    sendWifi(); // Call the function to send Wi-Fi data when qrData changes
+  }, [qrData]);
 
   // Combined function to handle permission request and navigation
   const handleScanPress = async () => {
@@ -36,21 +62,27 @@ export default function AddDeviceScreen() {
           ),
         }}
       />
-      
+
       {/* Tutorial or instructions section */}
       <View style={styles.tutorialContainer}>
         <Text style={styles.tutorialText}>
-          To scan a QR code, please allow camera access. Press the button below once you've granted permission.
+          Bước 1: Kết nối Access Point của thiết bị
+        </Text>
+        <Text style={styles.tutorialText}>
+          Bước 2: Truy cập vào ứng dụng
+        </Text>
+        <Text style={styles.tutorialText}>
+          Bước 3: Quét mã để thêm ứng dụng
         </Text>
       </View>
-      
+
       {/* Button to request camera permission and navigate to scanner */}
       <View style={styles.buttonContainer}>
         <Pressable style={styles.scanButton} onPress={handleScanPress}>
           <Text style={styles.scanButtonText}>Scan QR Code</Text>
         </Pressable>
       </View>
-      
+
     </SafeAreaView>
   );
 }
@@ -69,7 +101,7 @@ const styles = StyleSheet.create({
   tutorialText: {
     fontSize: 18,
     textAlign: "center",
-    marginBottom: 30,
+    marginBottom: 10, // Reduced margin for better spacing
   },
   buttonContainer: {
     alignItems: "center",
@@ -85,12 +117,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-  },
-  permissionWarning: {
-    color: "#ff0000",
-    marginTop: 20,
-    fontSize: 14,
-    textAlign: "center",
   },
   backButton: {
     marginLeft: 15,
