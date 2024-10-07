@@ -28,7 +28,6 @@ const Index: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const colorScheme = Appearance.getColorScheme(); 
   const router = useRouter();
 
   const fetchDevices = useCallback(async (pageNum: number) => {
@@ -70,7 +69,7 @@ const Index: React.FC = () => {
   );
 
   const menuItems = [
-    { label: "Add Device", onPress: () => router.replace('/(tabs)/groups/addDevice') },
+    { label: "Add Device", onPress: () => router.replace('/(tabs)/devices/addDevice') },
     { label: "Add Group", onPress: () => router.replace('/(tabs)/groups/addGroup') },
     { label: "Add Automation", onPress: () => router.replace('/(tabs)/automations/addAutomation') },
   ];

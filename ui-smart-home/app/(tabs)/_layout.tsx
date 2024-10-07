@@ -10,7 +10,7 @@ const TabLayout = () => {
 
   useEffect(() => {
     setShowTabBars(
-      !["/groups/addDevice", "/groups/addGroup", "/groups/scanner"].includes(pathName));
+      !["/devices/addDevice", "/groups/addGroup", "/groups/scanner"].includes(pathName));
   }, [pathName]);
 
   return (
@@ -75,6 +75,20 @@ const TabLayout = () => {
               <TabBarIcon name="person-outline" color={color} size={size} />
             ),
             headerShown: false,
+          }}
+        />
+         <Tabs.Screen
+          name="devices"
+          options={{
+            href: null,
+            headerShown: false
+          }}
+        />
+        <Tabs.Screen
+          name="scenes/addScene"
+          options={{
+            href: null,
+            headerShown: false
           }}
         />
       </Tabs>

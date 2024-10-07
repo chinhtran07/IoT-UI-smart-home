@@ -35,13 +35,13 @@ export default function Index() {
   }
 
   const goToAddScene = () => {
-    router.push("/(tabs)/automations/addScene");
+    router.push("/(tabs)/scenes/addScene");
   }
 
   // Menu items for the reusable header
   const menuItems = [
     { label: "Add Automation", onPress: () =>  router.push("/(tabs)/automations/addAutomation") }, 
-    { label: "Add Scene", onPress: () =>     router.push("/(tabs)/automations/addScene")    }, 
+    { label: "Add Scene", onPress: () =>     router.push("/(tabs)/scenes/addScene")    }, 
   ];
 
   // Render mock data

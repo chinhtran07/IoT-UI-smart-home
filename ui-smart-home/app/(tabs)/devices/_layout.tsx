@@ -7,12 +7,11 @@ export default function RootLayout() {
   return (
     <QRProvider>
     <Stack
-      initialRouteName="index"
     >
-      <Stack.Screen name="addGroup" options={{ headerTitleAlign: "center", headerTitle: "Create Group", headerBackVisible: true }} />
-      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="addDevice" options={{ headerTitleAlign: "center", headerTitle: "Add Device", headerBackVisible: true }} />
+      <Stack.Screen name="scanner" options={{ headerShown: false }} />
       <Stack.Screen
-        name="[groupId]"
+        name="[deviceId]"
         options={{
           headerShown: true,
           headerTitle: '',

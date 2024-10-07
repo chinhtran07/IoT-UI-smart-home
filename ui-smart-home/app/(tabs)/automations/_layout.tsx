@@ -6,26 +6,12 @@ export default function RootLayout() {
         <Stack
             initialRouteName="index">
             <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="addAutomation" options={{ headerTitleAlign: "center", headerTitle: "Create Automation"}}/>
-            <Stack.Screen name="addScene" options={{ headerTitleAlign: "center", headerTitle: "Create Scene" }}/>
-            <Stack.Screen
-                name="[automationId]"
+            <Stack.Screen name="addAutomation"
                 options={{
-                    headerShown: true,
-                    headerTitle: '',
-                    headerTitleAlign: 'center',
-                    headerBackTitleVisible: true,
-                }}
-            />
-            <Stack.Screen
-                name="[sceneId]"
-                options={{
-                    headerShown: true,
-                    headerTitle: '',
-                    headerTitleAlign: 'center',
-                    headerBackTitleVisible: true,
-                }}
-            />
+                    headerTitleAlign: "center",
+                    headerTitle: "Create Automation",
+                    headerBackVisible: true
+                }} />
         </Stack>
     );
 }
