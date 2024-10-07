@@ -1,13 +1,7 @@
 import React, { useState, useCallback } from "react";
-import {
-  View,
-  FlatList,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-} from "react-native";
-import { useFocusEffect, useRouter } from "expo-router";
-import { Appbar, Text } from "react-native-paper";
+import { View, FlatList, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { useFocusEffect, Stack, useRouter } from "expo-router";
+import { Text, Button as PaperButton, Searchbar } from "react-native-paper";
 import { Ionicons } from '@expo/vector-icons';
 import Colors from "@/constants/Colors"; // Import Colors from the specified path
 import apiClient from "@/services/apiService";
@@ -64,13 +58,24 @@ const GroupListScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Appbar.Header style={styles.appBar}>
-        <Appbar.Content title="Groups" titleStyle={styles.appBarTitle} />
-        <Appbar.Action
-          icon={() => <Ionicons name="add-circle" size={24} color={Colors.light.tint} />}
-          onPress={() => router.push("/(tabs)/groups/addGroup")}
-        />
-      </Appbar.Header>
+      <Stack.Screen
+        options={{
+          headerTitle: "Groups",
+          headerTitleAlign: "center",
+          headerStyle: {
+            backgroundColor: "#94D9F1",
+          },
+          headerTintColor: "white",
+          headerRight: () => (
+            <PaperButton
+              icon={() => <Ionicons name="add-circle" size={24} color={Colors.light.tint} />}
+              onPress={() => router.push("/(tabs)/groups/addGroup")}
+            >
+              Add
+            </PaperButton>
+          ),
+        }}
+      />
 
       <FlatList
         data={groups}
@@ -88,12 +93,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.light.background,
-  },
-  appBar: {
-    backgroundColor: '#94D9F1', // Set a default color if needed
-  },
-  appBarTitle: {
-    color: Colors.light.text,
   },
   listContainer: {
     padding: 20,

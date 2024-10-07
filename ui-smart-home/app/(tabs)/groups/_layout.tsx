@@ -5,18 +5,12 @@ export default function RootLayout() {
   return (
     <QRProvider>
       <Stack initialRouteName="index">
-        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="index" />
         <Stack.Screen
           name="addGroup"
-          options={{
-            headerShown: false,
-          }}
         />
         <Stack.Screen
           name="[groupId]"
-          options={{
-            headerShown: false,
-          }}
         />
       </Stack>
     </QRProvider>

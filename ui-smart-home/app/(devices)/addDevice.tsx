@@ -2,7 +2,7 @@ import { Stack, useRouter } from "expo-router";
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { useCameraPermissions } from "expo-camera";
 import { AntDesign } from '@expo/vector-icons'; // Import AntDesign for back button icon
-import { QRProvider, useQR } from "@/context/QrContext";
+import { useQR } from "@/context/QrContext";
 import { useEffect } from "react";
 import axios from "axios";
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import { Appbar } from "react-native-paper"; // Import Appbar
+import { Stack } from "expo-router";
 import apiClient from "@/services/apiService";
 import { API_ENDPOINTS } from "@/configs/apiConfig";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -50,10 +50,17 @@ const GroupDetailScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Appbar.Header style={{ backgroundColor: Colors.headerBackground.color }}>
-        <Appbar.BackAction onPress={() => router.back()} /> 
-        <Appbar.Content title={group.name} />
-      </Appbar.Header>
+      <Stack.Screen
+        options={{
+          headerTitle: group.name,
+          headerTitleAlign: "center",
+          headerStyle: {
+            backgroundColor: Colors.headerBackground.color,
+          },
+          headerTintColor: "#fff",
+          headerBackTitleVisible: false, // Hide the back title
+        }}
+      />
 
       <Image source={{ uri: group.icon }} style={styles.groupImage} />
       <Text style={styles.groupName}>{group.name}</Text>

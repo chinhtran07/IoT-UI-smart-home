@@ -1,6 +1,6 @@
-import React, { useState, useLayoutEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
-import { useNavigation } from 'expo-router';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { Stack, useRouter } from 'expo-router';
 import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
 
 const mockData = [
@@ -8,26 +8,15 @@ const mockData = [
   { id: 2, action: 'Play music' },
 ];
 
-const AddSceneScreen = () => {
-  const navigation = useNavigation();
+const AddSceneScreen: React.FC = () => {
   const [actions, setActions] = useState(mockData);
-
-  // Use useLayoutEffect to set header options
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={handleSave}>
-          <Text style={styles.saveButton}>Save</Text>
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
+  const router = useRouter();
 
   const handleSave = () => {
-    // Handle save logic here
+    // Xử lý logic lưu tại đây
     console.log("Scene saved!");
-    // Navigate back or perform other actions as needed
-    navigation.goBack();
+    // Điều hướng quay lại
+    router.back();
   };
 
   const deleteAction = (id: number) => {
@@ -44,7 +33,7 @@ const AddSceneScreen = () => {
     );
   };
 
-  const renderActionItem = (item: any) => {
+  const renderActionItem = (item: { id: number, action: string }) => {
     return (
       <Swipeable
         key={item.id}
@@ -61,6 +50,19 @@ const AddSceneScreen = () => {
 
   return (
     <GestureHandlerRootView style={styles.container}>
+      {/* Stack.Screen configuration */}
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: "Add Scene",
+          headerTitleAlign: 'center',
+          headerRight: () => (
+            <TouchableOpacity onPress={handleSave}>
+              <Text style={styles.saveButton}>Save</Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
       <ScrollView contentContainerStyle={styles.scrollView}>
         {/* Action Section */}
         <View style={[styles.card, { borderColor: '#4285F4' }]}>
@@ -70,7 +72,6 @@ const AddSceneScreen = () => {
             <Text style={styles.addLink}>Add</Text>
           </TouchableOpacity>
         </View>
-        {/* Additional Sections Can Be Added Here */}
       </ScrollView>
     </GestureHandlerRootView>
   );

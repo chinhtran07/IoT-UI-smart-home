@@ -8,8 +8,8 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { Searchbar, Button as PaperButton, TextInput, Appbar } from "react-native-paper";
+import { useNavigation, Stack } from "expo-router";
+import { Searchbar, Button as PaperButton, TextInput } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import apiClient from "@/services/apiService";
 import { API_ENDPOINTS } from "@/configs/apiConfig";
@@ -55,29 +55,32 @@ const AddGroupDeviceScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
-  const router = useRouter();
+  const navigation = useNavigation();
 
-  const fetchDevices = useCallback(async (pageNum: number) => {
-    if (loading || !hasMore) return;
+  const fetchDevices = useCallback(
+    async (pageNum: number) => {
+      if (loading || !hasMore) return;
 
-    setLoading(true);
-    try {
-      const res = await apiClient.get<ResponseData>(
-        `${API_ENDPOINTS.devices.by_owner}?page=${pageNum}`
-      );
-      if (res.status === 200) {
-        const { devices: newDevices, totalPages } = res.data;
-        setDevices((prevDevices) => [...prevDevices, ...newDevices]);
-        setHasMore(pageNum < totalPages);
-      } else {
-        console.error("Failed to fetch devices");
+      setLoading(true);
+      try {
+        const res = await apiClient.get<ResponseData>(
+          `${API_ENDPOINTS.devices.by_owner}?page=${pageNum}`
+        );
+        if (res.status === 200) {
+          const { devices: newDevices, totalPages } = res.data;
+          setDevices((prevDevices) => [...prevDevices, ...newDevices]);
+          setHasMore(pageNum < totalPages);
+        } else {
+          console.error("Failed to fetch devices");
+        }
+      } catch (error) {
+        console.error("Error fetching devices:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching devices:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [loading, hasMore]);
+    },
+    [loading, hasMore]
+  );
 
   useEffect(() => {
     fetchDevices(page);
@@ -87,8 +90,8 @@ const AddGroupDeviceScreen: React.FC = () => {
     setFilteredDevices(
       searchQuery
         ? devices.filter((device) =>
-            device.name.toLowerCase().includes(searchQuery.toLowerCase())
-          )
+          device.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
         : devices
     );
   }, [searchQuery, devices]);
@@ -110,7 +113,7 @@ const AddGroupDeviceScreen: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append("name", groupName);
-      
+
       if (groupImage) {
         const fileType = groupImage.split(".").pop();
         formData.append("icon", {
@@ -120,11 +123,15 @@ const AddGroupDeviceScreen: React.FC = () => {
         } as any);
       }
 
-      const createGroupResponse = await apiClient.post(API_ENDPOINTS.groups.create, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const createGroupResponse = await apiClient.post(
+        API_ENDPOINTS.groups.create,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       if (createGroupResponse.status === 201) {
         const groupId = createGroupResponse.data._id;
@@ -134,7 +141,7 @@ const AddGroupDeviceScreen: React.FC = () => {
         });
 
         alert("Group created and devices added successfully!");
-        router.back();
+        navigation.goBack();
       } else {
         alert("Failed to create group.");
       }
@@ -145,7 +152,8 @@ const AddGroupDeviceScreen: React.FC = () => {
   };
 
   const pickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
       alert("Permission to access camera roll is required!");
       return;
@@ -165,10 +173,17 @@ const AddGroupDeviceScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Appbar.Header style={styles.appBar}>
-        <Appbar.BackAction onPress={() => router.back()} iconColor="white" />
-        <Appbar.Content titleStyle={styles.appBarTitle} title="Add Group" />
-      </Appbar.Header>
+      <Stack.Screen
+        options={{
+          headerTitle: "Add Group",
+          headerTitleAlign: "center", 
+          headerStyle: {
+            backgroundColor: "#94D9F1",
+          },
+          headerTintColor: "white",
+        }}
+      />
+
 
       <View style={styles.inputContainer}>
         <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
@@ -205,7 +220,9 @@ const AddGroupDeviceScreen: React.FC = () => {
         )}
         onEndReached={() => setPage((prev) => prev + 1)}
         onEndReachedThreshold={0.1}
-        ListFooterComponent={loading ? <ActivityIndicator size="small" color="#0000ff" /> : null}
+        ListFooterComponent={
+          loading ? <ActivityIndicator size="small" color="#0000ff" /> : null
+        }
         style={styles.deviceList}
         contentContainerStyle={filteredDevices.length === 0 ? styles.emptyList : undefined}
       />
@@ -222,13 +239,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingBottom: 20,
-  },
-  appBar: {
-    backgroundColor: "#94D9F1",
-  },
-  appBarTitle: {
-    color: "white",
-    textAlign: "center"
   },
   inputContainer: {
     flexDirection: "row",

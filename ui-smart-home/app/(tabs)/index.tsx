@@ -71,7 +71,6 @@ const Index: React.FC = () => {
   const menuItems = [
     { label: "Add Device", onPress: () => router.push('/(devices)/addDevice') },
     { label: "Add Group", onPress: () => router.push('/(tabs)/groups/addGroup') },
-    { label: "Add Automation", onPress: () => router.push('/(tabs)/automations/addAutomation') },
   ];
 
   return (
