@@ -1,48 +1,49 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
-
-const mockData = [
-  { id: 1, action: 'Turn on the lights' },
-  { id: 2, action: 'Play music' },
-];
+import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+import { useActionContext } from '@/context/ActionContext'; // Import context
 
 const AddSceneScreen: React.FC = () => {
-  const [actions, setActions] = useState(mockData);
   const router = useRouter();
+  const { actions, removeAction, resetActions } = useActionContext(); // Lấy phương thức từ ActionContext
 
   const handleSave = () => {
-    // Xử lý logic lưu tại đây
-    console.log("Scene saved!");
-    // Điều hướng quay lại
-    router.back();
+
+    resetActions();
+    router.back(); // Điều hướng quay lại
   };
 
-  const deleteAction = (id: number) => {
-    setActions(actions.filter(action => action.id !== id));
+  const goToAction = () => {
+    router.push("/(actions)"); // Điều hướng tới trang actions
   };
 
-  const renderRightActions = () => {
+  // Cập nhật hàm xóa để sử dụng `_id`
+  const deleteAction = (id: string) => {
+    removeAction(id); // Sử dụng removeAction từ context để xóa action theo _id
+  };
+
+  const renderRightActions = (id: string) => {
     return (
       <View style={styles.deleteButtonContainer}>
-        <TouchableOpacity style={styles.deleteButton}>
+        <TouchableOpacity style={styles.deleteButton} onPress={() => deleteAction(id)}>
           <Text style={styles.deleteButtonText}>Delete</Text>
         </TouchableOpacity>
       </View>
     );
   };
 
-  const renderActionItem = (item: { id: number, action: string }) => {
+  // Cập nhật để sử dụng _id thay vì id
+  const renderActionItem = (item: { _id: string; description: string }) => {
     return (
       <Swipeable
-        key={item.id}
-        renderRightActions={() => renderRightActions()}
+        key={item._id} // Sử dụng _id làm key
+        renderRightActions={() => renderRightActions(item._id)}
         onSwipeableOpen={() => console.log('Swipe opened')}
         onSwipeableClose={() => console.log('Swipe closed')}
       >
         <View style={styles.actionContainer}>
-          <Text style={styles.actionText}>{item.action}</Text>
+          <Text style={styles.actionText}>{item.description}</Text>
         </View>
       </Swipeable>
     );
@@ -50,7 +51,6 @@ const AddSceneScreen: React.FC = () => {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      {/* Stack.Screen configuration */}
       <Stack.Screen
         options={{
           headerShown: true,
@@ -64,11 +64,10 @@ const AddSceneScreen: React.FC = () => {
         }}
       />
       <ScrollView contentContainerStyle={styles.scrollView}>
-        {/* Action Section */}
         <View style={[styles.card, { borderColor: '#4285F4' }]}>
           <Text style={styles.cardTitle}>Actions</Text>
-          {actions.map(renderActionItem)}
-          <TouchableOpacity>
+          {actions.map(renderActionItem)} 
+          <TouchableOpacity onPress={goToAction}>
             <Text style={styles.addLink}>Add</Text>
           </TouchableOpacity>
         </View>

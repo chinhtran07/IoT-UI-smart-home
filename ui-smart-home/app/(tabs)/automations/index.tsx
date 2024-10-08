@@ -1,26 +1,42 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, View, FlatList, Button } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, Text, View, FlatList, Button, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ReusableHeader from "@/components/Header"; // Ensure this is your reusable header component
 import { Stack, useRouter } from "expo-router";
+import apiClient from "@/services/apiService";
+import { API_ENDPOINTS } from "@/configs/apiConfig";
 
 const optionsData = ["Scenario", "Scene"];
 
-const mockAutomations = [
-  { id: '1', title: "Automation 1", description: "Description for Automation 1" },
-  { id: '2', title: "Automation 2", description: "Description for Automation 2" },
-  { id: '3', title: "Automation 3", description: "Description for Automation 3" },
-];
-
-const mockScenes = [
-  { id: '1', title: "Scene 1", description: "Description for Scene 1" },
-  { id: '2', title: "Scene 2", description: "Description for Scene 2" },
-  { id: '3', title: "Scene 3", description: "Description for Scene 3" },
-];
-
 export default function Index() {
   const [selectedOption, setSelectedOption] = useState(optionsData[0]);
+  const [scenarios, setScenarios] = useState([]); // Fetched scenarios
+  const [scenes, setScenes] = useState([]); // Fetched scenes
+  const [loading, setLoading] = useState(true); // Loading state
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true); // Start loading
+      try {
+        const resScenario = await apiClient.get(API_ENDPOINTS.scenarios.by_owner);
+        if (resScenario.status === 200) {
+          setScenarios(resScenario.data);
+        }
+
+        const resScene = await apiClient.get(API_ENDPOINTS.scenes.by_user);
+        if (resScene.status === 200) {
+          setScenes(resScene.data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // End loading
+      }
+    };
+
+    fetchData();
+  }, []); // Empty dependency array to run once on mount
 
   const handleLeftMenuSelect = (option: string) => {
     setSelectedOption(option);
@@ -29,11 +45,11 @@ export default function Index() {
 
   const goToAddScenario = () => {
     router.push("/(scenarios)/addScenario");
-  }
+  };
 
   const goToAddScene = () => {
     router.push("/(scenes)/addScene");
-  }
+  };
 
   const menuItems = [
     { label: "Add Scenario", onPress: goToAddScenario },
@@ -47,22 +63,24 @@ export default function Index() {
     </View>
   );
 
-  const currentData = selectedOption === "Scenario" ? mockAutomations : mockScenes;
+  const currentData = selectedOption === "Scenario" ? scenarios : scenes;
 
   return (
     <SafeAreaView style={styles.container}>
       <ReusableHeader
-              title={selectedOption}
-              leftMenuOptions={optionsData}
-              onLeftMenuSelect={handleLeftMenuSelect}
-              menuItems={menuItems}
-            />
+        title={selectedOption}
+        leftMenuOptions={optionsData}
+        onLeftMenuSelect={handleLeftMenuSelect}
+        menuItems={menuItems}
+      />
       <View style={styles.contentContainer}>
-        {currentData.length > 0 ? (
+        {loading ? ( // Display loading indicator while fetching data
+          <ActivityIndicator size="large" color="#007BFF" />
+        ) : currentData.length > 0 ? (
           <FlatList
             data={currentData}
             renderItem={renderItem}
-            keyExtractor={item => item.id}
+            keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContainer}
           />
         ) : (
@@ -83,7 +101,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 20, // Thêm khoảng cách ở trên cùng
+    paddingTop: 20, // Add spacing at the top
     backgroundColor: "#f8f9fa",
   },
   contentContainer: {

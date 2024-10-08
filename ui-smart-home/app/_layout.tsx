@@ -1,27 +1,31 @@
 import { AuthProvider } from "@/context/AuthContext";
 import { Stack } from "expo-router";
-import * as SplashScreen from 'expo-splash-screen';
-import { Provider as ReduxProvider } from 'react-redux';
-import { store } from '@/store/store'; // Đảm bảo bạn đã tạo Redux store ở đâu đó
+import * as SplashScreen from "expo-splash-screen";
+import { Provider as ReduxProvider } from "react-redux";
+import { store } from "@/store/store"; // Đảm bảo bạn đã tạo Redux store ở đâu đó
+import { ActionProvider } from "@/context/ActionContext";
+import { TriggerProvider } from "@/context/TriggerContext";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
- 
-
   return (
     <ReduxProvider store={store}>
       <AuthProvider>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(actions)" options={{ headerShown: false }} />
-          <Stack.Screen name="(devices)" options={{headerShown: false}} />
-          <Stack.Screen name="(scenarios)" options={{headerShown: false}} />
-          <Stack.Screen name="(scenes)" options={{headerShown: false}} />
-          <Stack.Screen name="(triggers)" options={{headerShown: false}} />
-        </Stack>
+        <ActionProvider>
+          <TriggerProvider>
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="login" options={{ headerShown: false }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="(actions)" options={{ headerShown: false }} />
+              <Stack.Screen name="(devices)" options={{ headerShown: false }} />
+              <Stack.Screen name="(scenarios)" options={{ headerShown: false }} />
+              <Stack.Screen name="(scenes)" options={{ headerShown: false }} />
+              <Stack.Screen name="(triggers)" options={{ headerShown: false }} />
+            </Stack>
+          </TriggerProvider>
+        </ActionProvider>
       </AuthProvider>
     </ReduxProvider>
   );

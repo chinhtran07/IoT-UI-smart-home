@@ -23,8 +23,8 @@ const ProfileScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.profileHeader}>
-        <Image source={{ uri: user?.image || "https://via.placeholder.com/100" }} style={styles.profileImage} />
-        <Text style={styles.profileName}>{user?.name || "John Doe"}</Text>
+        <Image source={{ uri: user?.avatar || "https://via.placeholder.com/100" }} style={styles.profileImage} />
+        <Text style={styles.profileName}>{user?.username || "John Doe"}</Text>
         <Text style={styles.profileEmail}>{user?.email || "john.doe@example.com"}</Text>
       </View>
 
@@ -37,8 +37,8 @@ const ProfileScreen: React.FC = () => {
         <TouchableOpacity style={styles.menuItem}>
           <Text style={styles.menuItemText}>Settings</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuItemText}>Privacy Policy</Text>
+        <TouchableOpacity style={styles.menuItem} onPress={() => router.push("/(tabs)/profile/permission")}>
+          <Text style={styles.menuItemText}>Permission</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
           <Text style={styles.menuItemText}>Logout</Text>

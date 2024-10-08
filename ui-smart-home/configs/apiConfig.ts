@@ -8,6 +8,7 @@ const GATEWAYS_BASE = `${API_BASE_URL}/gateways`
 const GROUPS_BASE = `${API_BASE_URL}/groups`
 const SCENES_BASE = `${API_BASE_URL}/scenes`
 const SCENARIOS_BASE = `${API_BASE_URL}/scenarios`
+const ACTION_BASSE =`${API_BASE_URL}/actions`
 
 export const API_ENDPOINTS = {
     auth: {
@@ -66,6 +67,9 @@ export const API_ENDPOINTS = {
         detailed: (id: string) => `${SCENARIOS_BASE}/${id}`,
         update: (id: string) => `${SCENARIOS_BASE}/${id}`,
         delete: (id: string) => `${SCENARIOS_BASE}/${id}`
+    },
+    actions: {
+        get_actions_by_device: ACTION_BASSE
     }
 };
 

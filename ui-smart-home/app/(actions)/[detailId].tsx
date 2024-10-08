@@ -1,30 +1,27 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import apiClient from '@/services/apiService';
 import { API_ENDPOINTS } from '@/configs/apiConfig';
-import { Trigger, useTriggerContext } from '@/context/TriggerContext';
+import { useActionContext } from '@/context/ActionContext';
 
 interface Action {
     _id: string; 
     description: string;
 }
 
-const TriggerScreen: React.FC = () => {
-    const { deviceId, deviceName } = useLocalSearchParams();
+const DetailScreen: React.FC = () => {
+    const { detailId} = useLocalSearchParams();
     const [actions, setActions] = useState<Action[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { addTrigger } = useTriggerContext();
+    const { addAction } = useActionContext();
 
     useEffect(() => {
-        if (deviceId) {
-            fetchActions(deviceId as string);
-        }
-    }, [deviceId]);
+        fetchActions(detailId as string);
+    }, [detailId]);
 
-    const fetchActions = useCallback(async (id: string) => {
-        setLoading(true);
+    const fetchActions = async (id: string) => {
         try {
             const response = await apiClient.get(`${API_ENDPOINTS.actions.get_actions_by_device}?deviceId=${id}`);
             if (response.status === 200) {
@@ -37,19 +34,18 @@ const TriggerScreen: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
-
-    const handleActionPress = useCallback((actionId: string) => {
-        const newTrigger: Trigger = { type: 'device', actionId };
-        addTrigger(newTrigger);
-        router.replace("/(scenarios)/addScenario");
-    }, [addTrigger]);
+    };
 
     const renderActionItem = ({ item }: { item: Action }) => (
-        <TouchableOpacity style={styles.actionItem} onPress={() => handleActionPress(item._id)}>
+        <TouchableOpacity style={styles.actionItem} onPress={() => handleActionPress(item)}>
             <Text style={styles.actionDescription}>{item.description}</Text>
         </TouchableOpacity>
     );
+
+    const handleActionPress = (item: Action) => {
+        addAction(item);
+        router.back();
+    };
 
     const renderContent = () => {
         if (loading) return <ActivityIndicator size="large" color="#6200ea" />;
@@ -60,7 +56,6 @@ const TriggerScreen: React.FC = () => {
                 renderItem={renderActionItem}
                 keyExtractor={(item) => item._id}
                 contentContainerStyle={styles.actionsList}
-                initialNumToRender={10} // Chỉ tải 10 mục đầu tiên để cải thiện hiệu suất
             />
         );
     };
@@ -70,7 +65,7 @@ const TriggerScreen: React.FC = () => {
             <Stack.Screen
                 options={{
                     headerShown: true,
-                    headerTitle: `${deviceName}`,
+                    headerTitle: `Action`,
                     headerTitleAlign: "center"
                 }}
             />
@@ -86,6 +81,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#f7f9fc',
         padding: 16,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        color: '#333',
+    },
+    deviceId: {
+        fontSize: 18,
+        color: '#555',
+        marginBottom: 20,
     },
     actionsList: {
         flexGrow: 1,
@@ -114,4 +120,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default TriggerScreen;
+export default DetailScreen;
