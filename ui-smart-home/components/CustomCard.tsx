@@ -23,7 +23,6 @@ import { socket } from "@/services/socketService";
 interface Device {
     id: string;
     name: string;
-    image?: string;
     status: boolean;
     type: 'actuator' | 'sensor';
     properties: {
@@ -34,9 +33,10 @@ interface Device {
 type CustomCardProps = {
     id: string;
     style?: StyleProp<ViewStyle>;
+    onLongPress?: () => void;
 };
 
-const CustomCard: React.FC<CustomCardProps> = ({ id, style }) => {
+const CustomCard: React.FC<CustomCardProps> = ({ id, style, onLongPress }) => {
     const [device, setDevice] = useState<Device | null>(null);
     const token = useAuth();
     const [isConnected, setIsConnected] = useState(false);
@@ -48,7 +48,16 @@ const CustomCard: React.FC<CustomCardProps> = ({ id, style }) => {
             try {
                 const res = await apiClient.get(API_ENDPOINTS.devices.detailed(id));
                 if (res.status === 200) {
-                    setDevice(res.data);
+                    const data = res.data;
+                    console.log(data);
+                    const obj: Device = {
+                        id: data.Device.id,
+                        name: data.Device.name,
+                        status: data.Device.status,
+                        type: data.Device.type,
+                        properties: data.properties,
+                    };
+                    setDevice(obj);
                 }
             } catch (error) {
                 console.error("Lỗi khi lấy thông tin thiết bị:", error);
@@ -68,17 +77,17 @@ const CustomCard: React.FC<CustomCardProps> = ({ id, style }) => {
         function onConnect() {
             setIsConnected(true);
             setTransport(socket.io.engine.transport.name);
-      
+
             socket.io.engine.on('upgrade', (transport) => {
-              setTransport(transport.name);
+                setTransport(transport.name);
             });
         }
-        
+
         function onDisconnect() {
             setIsConnected(false);
             setTransport('N/A');
         }
-        
+
         socket.on('connect', onConnect);
         socket.on('disconnect', onDisconnect);
 
@@ -93,6 +102,14 @@ const CustomCard: React.FC<CustomCardProps> = ({ id, style }) => {
                 },
             } : null);
         });
+
+        socket.on("heartbeat", (data: any) => {
+            console.log(data);
+            setDevice((prevDevice) => prevDevice ? {
+                ...prevDevice,
+                status: data
+            } : null);
+        })
 
         // Đăng ký subscribe cho device
         socket.emit("subscribe", id);
@@ -179,15 +196,10 @@ const CustomCard: React.FC<CustomCardProps> = ({ id, style }) => {
     };
 
     return (
-        <TouchableOpacity style={[styles.container, style]}>
+        <TouchableOpacity style={[styles.container, style]} onLongPress={onLongPress}>
             <Card style={[styles.card]}>
-                {device?.image && (
-                    <View style={styles.imageContainer}>
-                        <Image source={{ uri: device.image }} style={styles.image} />
-                    </View>
-                )}
                 <Card.Content style={styles.cardContent}>
-                    <Title style={[styles.title, {color: Colors.light.text } ]}>
+                    <Title style={[styles.title, { color: Colors.light.text }]}>
                         {device?.name}
                     </Title>
                     {device?.properties && Object.entries(device.properties).map(([key, value]) => (

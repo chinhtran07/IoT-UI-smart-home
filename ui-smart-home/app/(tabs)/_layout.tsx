@@ -9,8 +9,8 @@ const TabLayout = () => {
   const [isShowTabBars, setShowTabBars] = useState(true);
 
   useEffect(() => {
-    setShowTabBars(
-      !["/devices/addDevice", "/groups/addGroup", "/groups/scanner"].includes(pathName));
+    const regex = /^(\/devices\/.*|\/groups\/.*)$/;
+    setShowTabBars(!regex.test(pathName));
   }, [pathName]);
 
   return (

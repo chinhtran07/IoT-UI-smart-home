@@ -2,10 +2,13 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export interface Trigger {
+    id?:string,
     type: "time" | "device";
     startTime?: string;
     endTime?: string;
-    actionId?: string;
+    deviceId?: string;
+    comparator?: string;
+    deviceStatus?: any;
 }
 
 interface TriggerContextType {
@@ -13,6 +16,7 @@ interface TriggerContextType {
     addTrigger: (trigger: Trigger) => void;
     removeTrigger: (index: number) => void;
     resetTriggers: () => void; // Thêm phương thức reset
+    setTriggers: (trigges: Trigger[]) => void;
 }
 
 const TriggerContext = createContext<TriggerContextType | undefined>(undefined);
@@ -33,7 +37,7 @@ export const TriggerProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     return (
-        <TriggerContext.Provider value={{ triggers, addTrigger, removeTrigger, resetTriggers }}>
+        <TriggerContext.Provider value={{ triggers, addTrigger, removeTrigger, resetTriggers, setTriggers }}>
             {children}
         </TriggerContext.Provider>
     );

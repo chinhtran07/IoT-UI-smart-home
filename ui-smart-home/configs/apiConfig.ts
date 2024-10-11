@@ -8,7 +8,6 @@ const GATEWAYS_BASE = `${API_BASE_URL}/gateways`
 const GROUPS_BASE = `${API_BASE_URL}/groups`
 const SCENES_BASE = `${API_BASE_URL}/scenes`
 const SCENARIOS_BASE = `${API_BASE_URL}/scenarios`
-const ACTION_BASSE =`${API_BASE_URL}/actions`
 
 export const API_ENDPOINTS = {
     auth: {
@@ -28,6 +27,7 @@ export const API_ENDPOINTS = {
         detailed: (id: string) => `${DEVICES_BASE}/${id}`,
         update: (id: string) => `${DEVICES_BASE}/${id}`,
         delete: (id: string) => `${DEVICES_BASE}/${id}`,
+        get_actions: (id: string) => `${DEVICES_BASE}/${id}/actions`
     },
     access_control: {
         grant: `${ACCESS_CONTROL_BASE}/grant`,
@@ -55,7 +55,7 @@ export const API_ENDPOINTS = {
     },
     scenes: {
         create: SCENES_BASE,
-        by_user: SCENES_BASE,
+        by_owner: `${SCENES_BASE}/owner`,
         detailed: (id: string) => `${SCENES_BASE}/${id}`,
         update: (id: string) => `${SCENES_BASE}/${id}`,
         delete: (id: string) => `${SCENES_BASE}/${id}`,
@@ -68,9 +68,6 @@ export const API_ENDPOINTS = {
         update: (id: string) => `${SCENARIOS_BASE}/${id}`,
         delete: (id: string) => `${SCENARIOS_BASE}/${id}`
     },
-    actions: {
-        get_actions_by_device: ACTION_BASSE
-    }
 };
 
 export const API_CONFIG = {

@@ -8,7 +8,7 @@ import apiClient from "@/services/apiService";
 import { API_ENDPOINTS } from "@/configs/apiConfig";
 
 interface Group {
-  _id: string;
+  id: string;
   name: string;
   icon: string;
 }
@@ -19,7 +19,7 @@ interface GroupItemProps {
 }
 
 const GroupItem: React.FC<GroupItemProps> = ({ group, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(group._id)} style={styles.card}>
+  <TouchableOpacity onPress={() => onPress(group.id)} style={styles.card}>
     <View style={styles.groupItem}>
       <Image source={{ uri: group.icon }} style={styles.groupImage} />
       <View style={styles.groupInfo}>
@@ -79,7 +79,7 @@ const GroupListScreen: React.FC = () => {
 
       <FlatList
         data={groups}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <GroupItem group={item} onPress={handleGroupPress} />
         )}

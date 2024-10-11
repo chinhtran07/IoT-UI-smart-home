@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useState } from "react";
 import Colors from '@/constants/Colors'; // Import colors
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface Header {
     title: string;
@@ -44,7 +45,7 @@ const Header: React.FC<Header> = ({ title, leftMenuOptions, onLeftMenuSelect, me
     };
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             {/* Left Content */}
             <TouchableOpacity style={styles.leftContainer} onPress={toggleLeftMenu}>
                 <View style={styles.leftContent}>
@@ -81,7 +82,7 @@ const Header: React.FC<Header> = ({ title, leftMenuOptions, onLeftMenuSelect, me
                     ))}
                 </View>
             )}
-        </View>
+        </SafeAreaView>
     );
 };
 

@@ -9,7 +9,7 @@ import { useRouter } from 'expo-router';
 import { Trigger, useTriggerContext } from '@/context/TriggerContext';
 
 interface Device {
-    _id: string;
+    id: string;
     name: string;
 }
 
@@ -75,8 +75,12 @@ const TriggerScreen: React.FC = () => {
     };
 
     const formatTime = (date: Date) => {
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const hours = String(date.getHours()).padStart(2, '0'); // Thêm số 0 phía trước nếu cần
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
     };
+
 
     const handleConfirm = () => {
         if (startTime >= endTime) {
@@ -99,13 +103,13 @@ const TriggerScreen: React.FC = () => {
             style={styles.deviceItem}
             onPress={() => {
                 router.push({
-                    pathname: `/(triggers)/trigger`, 
+                    pathname: `/(triggers)/trigger`,
                     params: {
-                        deviceId: item._id,
+                        deviceId: item.id,
                         deviceName: item.name,
                     },
                 });
-            }} // Sử dụng router.push
+            }}
         >
             <Text style={styles.deviceName}>{item.name}</Text>
         </Pressable>
@@ -115,16 +119,16 @@ const TriggerScreen: React.FC = () => {
         <View style={styles.container}>
             <Stack.Screen
                 options={{
+                    headerBackVisible: true,
                     headerShown: true,
                     headerTitle: "Trigger",
-                    headerBackVisible: true,
                     headerTitleAlign: "center"
                 }}
             />
             <FlatList
                 data={devices}
                 renderItem={renderItem}
-                keyExtractor={(item) => item._id}
+                keyExtractor={(item) => item.id}
                 ListHeaderComponent={
                     <View style={styles.gridContainer}>
                         <View style={styles.gridItem}>
@@ -165,7 +169,7 @@ const TriggerScreen: React.FC = () => {
                             <DateTimePicker
                                 value={startTime}
                                 mode="time"
-                                is24Hour={false}
+                                is24Hour={true}
                                 display="default"
                                 onChange={handleStartTimeChange}
                             />
@@ -177,7 +181,7 @@ const TriggerScreen: React.FC = () => {
                             <DateTimePicker
                                 value={endTime}
                                 mode="time"
-                                is24Hour={false}
+                                is24Hour={true}
                                 display="default"
                                 onChange={handleEndTimeChange}
                             />

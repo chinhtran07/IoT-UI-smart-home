@@ -2,40 +2,53 @@ import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 // Định nghĩa kiểu Action
 interface Action {
-  _id: string;
+  id: string;
   description: string;
 }
 
 interface ActionContextType {
-  actions: Action[];
+  actions: Set<Action>;
   addAction: (action: Action) => void;
-  removeAction: (_id: string) => void;
+  removeAction: (id: string) => void;
   resetActions: () => void;
+  setActions: (actions: Set<Action>) => void;
 }
 
 const ActionContext = createContext<ActionContextType | undefined>(undefined);
 
 // Tạo provider cho context
 export const ActionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [actions, setActions] = useState<Action[]>([]);
+  const [actions, setActions] = useState<Set<Action>>(new Set());
 
   // Hàm để thêm action
   const addAction = (newAction: Action) => {
-    setActions((prevActions) => [...prevActions, newAction]);
+    setActions((prevActions) => {
+      const updatedActions = new Set(prevActions);
+      updatedActions.add(newAction);
+      return updatedActions;
+    });
   };
 
-  // Hàm để xoá action theo index
-  const removeAction = (_id: string) => {
-    setActions((prevActions) => prevActions.filter((action) => action._id !== _id));
+  // Hàm để xoá action theo id
+  const removeAction = (id: string) => {
+    setActions((prevActions) => {
+      const updatedActions = new Set(prevActions);
+      updatedActions.forEach((action) => {
+        if (action.id === id) {
+          updatedActions.delete(action);
+        }
+      });
+      return updatedActions;
+    });
   };
 
   // Hàm để reset toàn bộ action
   const resetActions = () => {
-    setActions([]);
+    setActions(new Set());
   };
 
   return (
-    <ActionContext.Provider value={{ actions, addAction, removeAction, resetActions }}>
+    <ActionContext.Provider value={{ actions, addAction, removeAction, resetActions, setActions }}>
       {children}
     </ActionContext.Provider>
   );

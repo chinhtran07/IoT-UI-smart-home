@@ -1,17 +1,19 @@
+import { API_ENDPOINTS } from '@/configs/apiConfig';
 import { useActionContext } from '@/context/ActionContext';
 import { Trigger, useTriggerContext } from '@/context/TriggerContext';
-import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import apiClient from '@/services/apiService';
+import { Link, Stack, useNavigation, useRootNavigationState, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, TextInput } from 'react-native';
 import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
 import { IconButton } from 'react-native-paper';
 
 interface Action {
-    _id: string;
+    id: string;
     description: string;
 }
 
-const ConditionItem: React.FC<{ item: Trigger; onDelete: () => void }> = React.memo(({ item, onDelete }) => (
+const SwipeableItem: React.FC<{ onDelete: () => void; children: React.ReactNode }> = React.memo(({ onDelete, children }) => (
     <Swipeable
         renderRightActions={() => (
             <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
@@ -20,59 +22,69 @@ const ConditionItem: React.FC<{ item: Trigger; onDelete: () => void }> = React.m
         )}
         overshootRight={false}
     >
-        <View style={styles.conditionContainer}>
-            {item.type === "time" ? (
-                <Text style={styles.conditionText}>
-                    Time Trigger: {item.startTime} - {item.endTime}
-                </Text>
-            ) : item.type === "device" ? (
-                <Text style={styles.conditionText}>
-                    Action: {item.actionId}
-                </Text>
-            ) : (
-                <Text style={styles.conditionText}>
-                    Unknown Trigger Type
-                </Text>
-            )}
-        </View>
+        {children}
     </Swipeable>
 ));
 
+const ConditionItem: React.FC<{ item: Trigger; onDelete: () => void }> = React.memo(({ item, onDelete }) => (
+    <SwipeableItem onDelete={onDelete}>
+        <View style={styles.conditionContainer}>
+            <Text style={styles.conditionText}>
+                {item.type === "time" ? `Time Trigger: ${item.startTime} - ${item.endTime}` : item.type === "device" ? `Action: ${item.deviceId}` : "Unknown Trigger Type"}
+            </Text>
+        </View>
+    </SwipeableItem>
+));
+
 const ActionItem: React.FC<{ item: Action; onDelete: () => void }> = React.memo(({ item, onDelete }) => (
-    <Swipeable
-        renderRightActions={() => (
-            <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
-                <Text style={styles.deleteButtonText}>Delete</Text>
-            </TouchableOpacity>
-        )}
-        overshootRight={false}
-    >
+    <SwipeableItem onDelete={onDelete}>
         <View style={styles.actionContainer}>
             <Text style={styles.actionText}>{item.description}</Text>
         </View>
-    </Swipeable>
+    </SwipeableItem>
 ));
 
 const AddScenarioScreen: React.FC = () => {
     const [executedOnce, setExecutedOnce] = useState(false);
+    const [scenarioName, setScenarioName] = useState(""); // State for scenario name
     const route = useRouter();
     const { triggers, removeTrigger, resetTriggers } = useTriggerContext();
     const { actions, removeAction, resetActions } = useActionContext();
 
-    const goToTrigger = () => route.push('/(triggers)');
-    const goToAction = () => route.push('/(actions)');
+    const goToTrigger = () => route.push("/(triggers)/listTriggers");
+    const goToAction = () => route.push('/(actions)/listActions');
 
     const handleToggle = () => setExecutedOnce(prev => !prev);
 
-    const handleSave = () => {
-        console.log("Scenario saved");
-        resetTriggers();
-        resetActions();
-        route.back();
+    const handleSave = async () => {
+        const data = {
+            name: scenarioName, // Use the entered scenario name
+            isEnabled: true,
+            triggers,
+            actions: Array.from(actions).map(action => action.id),
+        };
+
+        console.log(triggers);
+    
+        try {
+            const res = await apiClient.post(API_ENDPOINTS.scenarios.create, data);
+    
+            if (res.status === 201) {
+                // Only reset triggers and actions if the API call is successful
+                resetTriggers();
+                resetActions();
+                route.back(); // Navigate back after successful save
+            } else {
+                console.error("Failed to save scenario:", res.status);
+            }
+        } catch (error) {
+            console.error("Error saving scenario:", error);
+            // You can add some user feedback or error notification here
+        }
     };
 
-    const deleteAction = useCallback((_id: string) => {
-        removeAction(_id);
+    const deleteAction = useCallback((id: string) => {
+        removeAction(id);
     }, [removeAction]);
 
     const deleteCondition = useCallback((index: number) => {
@@ -106,10 +118,20 @@ const AddScenarioScreen: React.FC = () => {
                 }}
             />
             <ScrollView contentContainerStyle={styles.scrollView}>
+                <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>Scenario Name</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Enter scenario name"
+                        value={scenarioName}
+                        onChangeText={setScenarioName}
+                    />
+                </View>
+
                 <View style={[styles.card, { borderColor: '#4285F4' }]}>
                     <Text style={styles.cardTitle}>IF</Text>
                     {triggers.map((item, index) => (
-                        <ConditionItem key={index} item={item} onDelete={() => deleteCondition(index)} />
+                        <ConditionItem key={item.id || index} item={item} onDelete={() => deleteCondition(index)} />
                     ))}
                     <TouchableOpacity onPress={goToTrigger}>
                         <Text style={styles.addLink}>Add</Text>
@@ -118,8 +140,8 @@ const AddScenarioScreen: React.FC = () => {
 
                 <View style={[styles.card, { borderColor: '#34A853' }]}>
                     <Text style={styles.cardTitle}>THEN</Text>
-                    {actions.map(item => (
-                        <ActionItem key={item._id} item={item} onDelete={() => deleteAction(item._id)} />
+                    {Array.from(actions).map(item => (
+                        <ActionItem key={item.id} item={item} onDelete={() => deleteAction(item.id)} />
                     ))}
                     <TouchableOpacity onPress={goToAction}>
                         <Text style={styles.addLink}>Add</Text>
@@ -150,6 +172,20 @@ const styles = StyleSheet.create({
         padding: 20,
         paddingBottom: 80,
     },
+    inputContainer: {
+        marginBottom: 20,
+    },
+    inputLabel: {
+        fontSize: 16,
+        marginBottom: 5,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#D0D0D0',
+        borderRadius: 5,
+        padding: 10,
+        fontSize: 16,
+    },
     card: {
         borderWidth: 3,
         borderRadius: 10,
@@ -166,13 +202,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#F0F0F0',
         borderRadius: 5,
         marginBottom: 10,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
         elevation: 5,
     },
     actionContainer: {
@@ -180,13 +209,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#F0F0F0',
         borderRadius: 5,
         marginBottom: 10,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
         elevation: 5,
     },
     conditionText: {

@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { FlatList, StyleSheet, Dimensions, Appearance, ActivityIndicator } from 'react-native';
+import { FlatList, StyleSheet, Dimensions, ActivityIndicator, SafeAreaView, View } from 'react-native';
 import CustomCard from '@/components/CustomCard';
 import AddDeviceCard from '@/components/home/AddDeviceCard';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '@/constants/Colors'; 
 import ReusableHeader from '@/components/Header';
 import { useRouter } from 'expo-router';
@@ -10,7 +9,7 @@ import apiClient from '@/services/apiService';
 import { API_ENDPOINTS } from '@/configs/apiConfig';
 
 interface Device {
-  _id: string;
+  id: string;
 }
 
 interface ResponseData {
@@ -62,9 +61,10 @@ const Index: React.FC = () => {
 
   const renderDevice = ({ item }: { item: Device }) => (
     <CustomCard
-      key={item._id}
-      id={item._id}
-      style={{ width: cardWidth, margin: 10}} 
+      key={item.id}
+      id={item.id}
+      style={{ width: cardWidth, margin: 10 }}
+      onLongPress={() => router.push(`/(devices)/${item.id}`)} // Navigate to detail screen on long press
     />
   );
 
@@ -84,7 +84,7 @@ const Index: React.FC = () => {
       <FlatList
         data={devices}
         renderItem={renderDevice}
-        keyExtractor={item => item._id} 
+        keyExtractor={item => item.id} 
         numColumns={2} 
         ListEmptyComponent={<AddDeviceCard />}
         contentContainerStyle={styles.deviceListContainer}

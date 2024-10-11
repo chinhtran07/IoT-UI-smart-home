@@ -8,9 +8,12 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen
           name="addGroup"
+          options={{headerShown: false}}
         />
         <Stack.Screen
           name="[groupId]"
+          options={{headerShown: false}
+          }
         />
       </Stack>
     </QRProvider>

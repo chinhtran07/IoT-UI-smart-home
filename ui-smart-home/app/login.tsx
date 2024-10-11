@@ -52,7 +52,7 @@ const LoginScreen: React.FC = () => {
     //     const redirectUri = Google.
 
     //     const result = await AuthSession.startAsync({
-    //         authUrl: `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=email%20profile`,
+    //         authUrl: `https://accounts.google.com/o/oauth2/v2/auth?clientid=${process.env.GOOGLE_CLIENTid}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=email%20profile`,
     //     });
 
     //     if (result.type === 'success') {

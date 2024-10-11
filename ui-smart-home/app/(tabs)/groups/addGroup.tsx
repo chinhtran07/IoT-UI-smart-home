@@ -13,9 +13,10 @@ import { Searchbar, Button as PaperButton, TextInput } from "react-native-paper"
 import * as ImagePicker from "expo-image-picker";
 import apiClient from "@/services/apiService";
 import { API_ENDPOINTS } from "@/configs/apiConfig";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface Device {
-  _id: string;
+  id: string;
   name: string;
   status: string;
   type: string;
@@ -134,7 +135,7 @@ const AddGroupDeviceScreen: React.FC = () => {
       );
 
       if (createGroupResponse.status === 201) {
-        const groupId = createGroupResponse.data._id;
+        const groupId = createGroupResponse.data.id;
 
         await apiClient.post(API_ENDPOINTS.groups.add_device(groupId), {
           deviceIds: selectedDevices,
@@ -172,9 +173,10 @@ const AddGroupDeviceScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Stack.Screen
         options={{
+          headerShown: true,
           headerTitle: "Add Group",
           headerTitleAlign: "center", 
           headerStyle: {
@@ -210,12 +212,12 @@ const AddGroupDeviceScreen: React.FC = () => {
 
       <FlatList
         data={filteredDevices}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <DeviceItem
             device={item}
-            isSelected={selectedDevices.includes(item._id)}
-            onSelect={() => handleDeviceSelect(item._id)}
+            isSelected={selectedDevices.includes(item.id)}
+            onSelect={() => handleDeviceSelect(item.id)}
           />
         )}
         onEndReached={() => setPage((prev) => prev + 1)}
@@ -230,7 +232,7 @@ const AddGroupDeviceScreen: React.FC = () => {
       <PaperButton mode="contained" onPress={handleSave} style={styles.saveButton}>
         Save Group
       </PaperButton>
-    </View>
+    </SafeAreaView>
   );
 };
 

@@ -6,8 +6,10 @@ import { API_ENDPOINTS } from '@/configs/apiConfig';
 import { Trigger, useTriggerContext } from '@/context/TriggerContext';
 
 interface Action {
-    _id: string; 
+    id: string; 
     description: string;
+    property: string;
+    value: string;
 }
 
 const TriggerScreen: React.FC = () => {
@@ -26,7 +28,7 @@ const TriggerScreen: React.FC = () => {
     const fetchActions = useCallback(async (id: string) => {
         setLoading(true);
         try {
-            const response = await apiClient.get(`${API_ENDPOINTS.actions.get_actions_by_device}?deviceId=${id}`);
+            const response = await apiClient.get(API_ENDPOINTS.devices.get_actions(id));
             if (response.status === 200) {
                 setActions(response.data);
             } else {
@@ -39,14 +41,14 @@ const TriggerScreen: React.FC = () => {
         }
     }, []);
 
-    const handleActionPress = useCallback((actionId: string) => {
-        const newTrigger: Trigger = { type: 'device', actionId };
+    const handleActionPress = useCallback((item: Action) => {
+        const newTrigger: Trigger = { type: 'device', deviceId: `${deviceId}`, comparator: "eq", deviceStatus: item.value };
         addTrigger(newTrigger);
         router.replace("/(scenarios)/addScenario");
     }, [addTrigger]);
 
     const renderActionItem = ({ item }: { item: Action }) => (
-        <TouchableOpacity style={styles.actionItem} onPress={() => handleActionPress(item._id)}>
+        <TouchableOpacity style={styles.actionItem} onPress={() => handleActionPress(item)}>
             <Text style={styles.actionDescription}>{item.description}</Text>
         </TouchableOpacity>
     );
@@ -58,7 +60,7 @@ const TriggerScreen: React.FC = () => {
             <FlatList
                 data={actions}
                 renderItem={renderActionItem}
-                keyExtractor={(item) => item._id}
+                keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.actionsList}
                 initialNumToRender={10} // Chỉ tải 10 mục đầu tiên để cải thiện hiệu suất
             />

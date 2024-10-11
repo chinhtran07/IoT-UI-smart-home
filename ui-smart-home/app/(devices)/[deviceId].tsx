@@ -1,22 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Card, Title, Paragraph, Button, Avatar, TextInput, Switch } from 'react-native-paper';
+import { Title, Paragraph, Button, Switch } from 'react-native-paper';
 import Slider from '@react-native-community/slider';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import apiClient from '@/services/apiService';
 import { API_ENDPOINTS } from '@/configs/apiConfig';
+import { socket } from '@/services/socketService';
 
 interface Device {
-  _id: string;
+  id: string;
   name: string;
-  status: string;
+  status: boolean;
   type: string;
-  properties: (string | number | boolean)[];
+  properties: { [key: string]: string | number | boolean };
 }
 
 const DeviceDetail: React.FC = () => {
   const { deviceId } = useLocalSearchParams();
   const [device, setDevice] = useState<Device | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [transport, setTransport] = useState('N/A');
+
+  useEffect(() => {
+    const onConnect = () => {
+      setIsConnected(true);
+      setTransport(socket.io.engine.transport.name);
+    };
+
+    const onDisconnect = () => {
+      setIsConnected(false);
+      setTransport('N/A');
+    };
+
+    const onDataReceived = (data: any) => {
+      console.log("Data received from socket:", data);
+      setDevice((prevDevice) => prevDevice ? {
+        ...prevDevice,
+        properties: { ...prevDevice.properties, ...data },
+      } : null);
+    };
+
+    const onHeartbeat = (data: any) => {
+      setDevice((prevDevice) => prevDevice ? {
+        ...prevDevice,
+        status: data.alive,
+      } : null);
+    };
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    socket.on("data", onDataReceived);
+    socket.on("heartbeat", onHeartbeat);
+    
+    // Subscribe to device
+    socket.emit("subscribe", device?.id);
+
+    // Cleanup function
+    return () => {
+      socket.emit("unsubscribe", device?.id);
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      socket.off("data", onDataReceived);
+      socket.off("heartbeat", onHeartbeat);
+    };
+  }, [device?.id]);
 
   useEffect(() => {
     const fetchDeviceDetails = async () => {
@@ -26,9 +73,14 @@ const DeviceDetail: React.FC = () => {
       }
 
       try {
-        // Lấy thông tin thiết bị theo ID
-        const fetchedDevice: Device = await apiClient.get(API_ENDPOINTS.devices.detailed(deviceId));
-        setDevice(fetchedDevice);
+        const { data } = await apiClient.get(API_ENDPOINTS.devices.detailed(deviceId));
+        setDevice({
+          id: data.Device.id,
+          name: data.Device.name,
+          status: data.Device.status,
+          type: data.Device.type,
+          properties: data.properties,
+        });
       } catch (error) {
         console.error('Error fetching device details:', error);
       }
@@ -37,18 +89,26 @@ const DeviceDetail: React.FC = () => {
     fetchDeviceDetails();
   }, [deviceId]);
 
-  const onToggle = () => {
-    // Logic xử lý bật/tắt thiết bị
-    console.log('Toggled device status');
-  };
+  const controlProperty = async (property: string, value: any) => {
+    try {
+      const commandValue = typeof value === "boolean" ? !value : value;
+      const res = await apiClient.post(API_ENDPOINTS.control, {
+        deviceId: device?.id,
+        command: { [property]: commandValue },
+      });
 
-  const onEdit = () => {
-    // Logic xử lý chỉnh sửa thiết bị
-    console.log('Edit device');
+      if (res.status === 204) {
+        setDevice((prevDevice) => prevDevice ? {
+          ...prevDevice,
+          properties: { ...prevDevice.properties, [property]: commandValue },
+        } : null);
+      }
+    } catch (error) {
+      console.error("Error controlling device:", error);
+    }
   };
 
   const onDelete = () => {
-    // Logic xử lý xóa thiết bị
     console.log('Delete device');
   };
 
@@ -58,85 +118,45 @@ const DeviceDetail: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Card style={styles.card}>
-        <Card.Content>
-          <Avatar.Image 
-            source={{ uri: 'link-to-image' }} // Thay thế bằng link hình ảnh thực tế
-            size={80} 
-            style={styles.avatar} 
-          />
-          <Title style={styles.title}>{device.name}</Title>
-          <Paragraph style={styles.detail}>ID: {device._id}</Paragraph>
-          <Paragraph style={styles.detail}>Trạng thái: {device.status}</Paragraph>
-          <Paragraph style={styles.detail}>Loại: {device.type}</Paragraph>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerTitle: device.name,
+          headerBackVisible: true,
+          headerTitleAlign: "center",
+        }}
+      />
+      <Title style={styles.title}>{device.name}</Title>
+      <Paragraph style={styles.detail}>Trạng thái: {device.status ? "Online" : "Offline"}</Paragraph>
 
-          {device.type === 'actuator' ? (
-            device.properties.map((property: any, index) => {
-              const propertyType = typeof property;
+      {Object.entries(device.properties).map(([propertyKey, propertyValue], index) => {
+        const propertyType = typeof propertyValue;
 
-              if (propertyType === 'boolean') {
-                return (
-                  <View key={index} style={styles.controlContainer}>
-                    <TextInput 
-                      label={`Giá trị thuộc tính ${index + 1}`} 
-                      value={property ? 'Bật' : 'Tắt'} 
-                      editable={false} 
-                    />
-                    <Switch 
-                      value={property}
-                      onValueChange={() => onToggle()} // Thay thế bằng logic điều khiển thực tế
-                    />
-                  </View>
-                );
-              } else if (propertyType === 'number') {
-                const [sliderValue, setSliderValue] = useState<number>(Number(property));
+        return (
+          <View key={index} style={styles.controlContainer}>
+            <Paragraph>{`Giá trị ${propertyKey}`}</Paragraph>
+            {propertyType === 'boolean' ? (
+              <Switch
+                value={propertyValue as boolean}
+                onValueChange={() => controlProperty(propertyKey, propertyValue)}
+              />
+            ) : propertyType === 'number' ? (
+              <Slider
+                value={Number(propertyValue)}
+                minimumValue={0}
+                maximumValue={100}
+                onValueChange={(value) => controlProperty(propertyKey, value)}
+              />
+            ) : (
+              <Paragraph>{`Giá trị ${propertyKey}: ${propertyValue}`}</Paragraph>
+            )}
+          </View>
+        );
+      })}
 
-                return (
-                  <View key={index} style={styles.controlContainer}>
-                    <TextInput 
-                      label={`Giá trị thuộc tính ${index + 1}`} 
-                      value={sliderValue.toString()} 
-                      editable={false} 
-                      style={styles.sliderInput}
-                    />
-                    <Slider
-                      value={sliderValue}
-                      minimumValue={0}
-                      maximumValue={100} 
-                      onValueChange={setSliderValue}
-                      onSlidingComplete={() => {
-                        console.log(`Cập nhật giá trị: ${sliderValue}`); 
-                      }}
-                    />
-                  </View>
-                );
-              } else if (propertyType === 'string') {
-                return (
-                  <View key={index} style={styles.controlContainer}>
-                    <TextInput 
-                      label={`Giá trị thuộc tính ${index + 1}`} 
-                      value={property} 
-                      onChangeText={(value) => console.log(`Cập nhật giá trị: ${value}`)} 
-                    />
-                  </View>
-                );
-              }
-              return null; 
-            })
-          ) : (
-            device.properties.map((property, index) => (
-              <Paragraph key={index} style={styles.detail}>
-                {`Giá trị thuộc tính ${index + 1}: ${property.toString()}`}
-              </Paragraph>
-            ))
-          )}
-        </Card.Content>
-        <Card.Actions style={styles.actions}>
-          <Button mode="contained" onPress={onToggle} style={styles.button}>Bật/Tắt</Button>
-          <Button mode="outlined" onPress={onEdit} style={styles.button}>Chỉnh sửa</Button>
-          <Button mode="text" onPress={onDelete} style={styles.button}>Xóa</Button>
-        </Card.Actions>
-      </Card>
+      <View style={styles.actions}>
+        <Button mode="text" onPress={onDelete} style={styles.button}>Xóa</Button>
+      </View>
     </View>
   );
 };
@@ -146,14 +166,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f5f5f5',
-  },
-  card: {
-    borderRadius: 10,
-    elevation: 5,
-  },
-  avatar: {
-    alignSelf: 'center',
-    marginBottom: 15,
   },
   title: {
     fontSize: 24,
@@ -167,6 +179,7 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   actions: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: 10,
   },
@@ -179,10 +192,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginVertical: 5,
-  },
-  sliderInput: {
-    width: '20%',
-    marginRight: 10,
   },
 });
 

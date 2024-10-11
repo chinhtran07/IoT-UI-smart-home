@@ -2,10 +2,13 @@ import React from "react";
 import { StyleSheet, TouchableOpacity, View, Text, Dimensions } from "react-native";
 import { Card } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 const AddDeviceCard = () => {
+  const router = useRouter();
+
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={() =>router.push("/(devices)/addDevice")}>
       <Card style={styles.card}>
         <View style={styles.iconWrapper}>
           <Ionicons name="add" size={40} color="white" />

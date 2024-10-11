@@ -6,7 +6,7 @@ import { API_ENDPOINTS } from '@/configs/apiConfig';
 import { useActionContext } from '@/context/ActionContext';
 
 interface Action {
-    _id: string; 
+    id: string; 
     description: string;
 }
 
@@ -23,7 +23,7 @@ const DetailScreen: React.FC = () => {
 
     const fetchActions = async (id: string) => {
         try {
-            const response = await apiClient.get(`${API_ENDPOINTS.actions.get_actions_by_device}?deviceId=${id}`);
+            const response = await apiClient.get(API_ENDPOINTS.devices.get_actions(id));
             if (response.status === 200) {
                 setActions(response.data);
             } else {
@@ -54,7 +54,7 @@ const DetailScreen: React.FC = () => {
             <FlatList
                 data={actions}
                 renderItem={renderActionItem}
-                keyExtractor={(item) => item._id}
+                keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.actionsList}
             />
         );
@@ -66,7 +66,8 @@ const DetailScreen: React.FC = () => {
                 options={{
                     headerShown: true,
                     headerTitle: `Action`,
-                    headerTitleAlign: "center"
+                    headerTitleAlign: "center",
+                    headerBackVisible: true,
                 }}
             />
             {renderContent()}

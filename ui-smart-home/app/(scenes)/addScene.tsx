@@ -1,53 +1,64 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
-import { useActionContext } from '@/context/ActionContext'; // Import context
+import { useActionContext } from '@/context/ActionContext'; 
+import apiClient from '@/services/apiService';
+import { API_ENDPOINTS } from '@/configs/apiConfig';
 
 const AddSceneScreen: React.FC = () => {
   const router = useRouter();
-  const { actions, removeAction, resetActions } = useActionContext(); // Lấy phương thức từ ActionContext
+  const { actions, removeAction, resetActions } = useActionContext();
+  const [sceneName, setSceneName] = useState(""); // Add state for scene name
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!sceneName.trim()) {
+      Alert.alert("Error", "Please enter a scene name");
+      return;
+    }
 
-    resetActions();
-    router.back(); // Điều hướng quay lại
+    try {
+      const res = await apiClient.post(API_ENDPOINTS.scenes.create, JSON.stringify({
+        name: sceneName, // Use the entered name
+        actions: Array.from(actions).map(action => action.id)
+      }));
+      
+      if (res.status === 201) {
+        resetActions();
+        Alert.alert("Success", "Scene has been created successfully!");
+        router.back();
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const goToAction = () => {
-    router.push("/(actions)"); // Điều hướng tới trang actions
+    router.push("/(actions)/listActions");
   };
 
-  // Cập nhật hàm xóa để sử dụng `_id`
   const deleteAction = (id: string) => {
-    removeAction(id); // Sử dụng removeAction từ context để xóa action theo _id
+    removeAction(id);
   };
 
-  const renderRightActions = (id: string) => {
-    return (
-      <View style={styles.deleteButtonContainer}>
-        <TouchableOpacity style={styles.deleteButton} onPress={() => deleteAction(id)}>
-          <Text style={styles.deleteButtonText}>Delete</Text>
-        </TouchableOpacity>
+  const renderRightActions = (id: string) => (
+    <View style={styles.deleteButtonContainer}>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteAction(id)}>
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderActionItem = (item: { id: string; description: string }) => (
+    <Swipeable
+      key={item.id}
+      renderRightActions={() => renderRightActions(item.id)}
+    >
+      <View style={styles.actionContainer}>
+        <Text style={styles.actionText}>{item.description}</Text>
       </View>
-    );
-  };
-
-  // Cập nhật để sử dụng _id thay vì id
-  const renderActionItem = (item: { _id: string; description: string }) => {
-    return (
-      <Swipeable
-        key={item._id} // Sử dụng _id làm key
-        renderRightActions={() => renderRightActions(item._id)}
-        onSwipeableOpen={() => console.log('Swipe opened')}
-        onSwipeableClose={() => console.log('Swipe closed')}
-      >
-        <View style={styles.actionContainer}>
-          <Text style={styles.actionText}>{item.description}</Text>
-        </View>
-      </Swipeable>
-    );
-  };
+    </Swipeable>
+  );
 
   return (
     <GestureHandlerRootView style={styles.container}>
@@ -65,8 +76,18 @@ const AddSceneScreen: React.FC = () => {
       />
       <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={[styles.card, { borderColor: '#4285F4' }]}>
+          <Text style={styles.cardTitle}>Scene Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter scene name"
+            value={sceneName}
+            onChangeText={setSceneName}
+          />
+        </View>
+
+        <View style={[styles.card, { borderColor: '#4285F4' }]}>
           <Text style={styles.cardTitle}>Actions</Text>
-          {actions.map(renderActionItem)} 
+          {Array.from(actions).map(renderActionItem)}
           <TouchableOpacity onPress={goToAction}>
             <Text style={styles.addLink}>Add</Text>
           </TouchableOpacity>
@@ -89,11 +110,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     marginBottom: 15,
-    justifyContent: 'space-between',
   },
   cardTitle: {
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 16,
+    marginTop: 10,
   },
   actionContainer: {
     flexDirection: 'row',

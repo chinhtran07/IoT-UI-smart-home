@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Stack, useRouter } from 'expo-router'; // Import useRouter for navigation
+import { Stack, useRouter } from 'expo-router';
 import apiClient from '@/services/apiService';
 import { API_ENDPOINTS } from '@/configs/apiConfig';
 
 interface Device {
-    _id: string;
+    id: string;
     name: string; // Adjust based on your actual device structure
 }
 
@@ -13,8 +13,8 @@ const ActionListScreen: React.FC = () => {
     const [devices, setDevices] = useState<Device[]>([]);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
-    const [page, setPage] = useState(1); // Manage pagination
-    const router = useRouter(); // Initialize router
+    const [page, setPage] = useState(1);
+    const router = useRouter();
 
     const fetchDevices = useCallback(
         async (pageNum: number) => {
@@ -55,7 +55,7 @@ const ActionListScreen: React.FC = () => {
     };
 
     const renderItem = ({ item }: { item: Device }) => (
-        <TouchableOpacity style={styles.actionItem} onPress={() => handleItemPress(item._id)}>
+        <TouchableOpacity style={styles.actionItem} onPress={() => handleItemPress(item.id)}>
             <Text style={styles.actionText}>{item.name}</Text>
         </TouchableOpacity>
     );
@@ -66,12 +66,13 @@ const ActionListScreen: React.FC = () => {
                 options={{
                     headerShown: true,
                     headerBackVisible: true,
+                    headerTitle: "Action"
                 }}
             />
             <FlatList
                 data={devices}
                 renderItem={renderItem}
-                keyExtractor={(item) => item._id}
+                keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.list}
                 onEndReached={loadMore}
                 onEndReachedThreshold={0.5}
