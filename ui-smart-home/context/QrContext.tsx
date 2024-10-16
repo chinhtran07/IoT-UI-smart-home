@@ -1,21 +1,13 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 
-// Định nghĩa kiểu cho QRContext
 interface QRContextType {
     qrData: string | null;
     setQrData: (data: string | null) => void;
 }
 
-// Tạo context với giá trị mặc định
 const QRContext = createContext<QRContextType | undefined>(undefined);
 
-// Định nghĩa props cho QRProvider
-interface QRProviderProps {
-    children: ReactNode;
-}
-
-// QRProvider component
-export const QRProvider: React.FC<QRProviderProps> = ({ children }) => {
+export const QRProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [qrData, setQrData] = useState<string | null>(null);
 
     return (
@@ -25,7 +17,6 @@ export const QRProvider: React.FC<QRProviderProps> = ({ children }) => {
     );
 };
 
-// Hook để sử dụng QRContext
 export const useQR = () => {
     const context = useContext(QRContext);
     if (!context) {

@@ -1,42 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Tabs, usePathname } from "expo-router";
 import TabBarIcon from "@/components/navigation/TabBarIcon";
-import  Colors  from '@/constants/Colors'; 
+import { Colors } from "@/constants/Colors";
+import { Tabs, usePathname } from "expo-router";
+import { StyleSheet, View } from "react-native";
 
-const TabLayout = () => {
+export default function TabLayout() {
   const pathName = usePathname();
-  const [isShowTabBars, setShowTabBars] = useState(true);
-
-  useEffect(() => {
-    const regex = /^(\/devices\/.*|\/groups\/.*)$/;
-    setShowTabBars(!regex.test(pathName));
-  }, [pathName]);
+  const shouldHideTabBar = /^(\/devices\/.*|\/groups\/.*)$/.test(pathName);
 
   return (
-    <View style={[styles.container]}>
+    <View style={styles.container}>
       <Tabs
         initialRouteName="index"
         screenOptions={{
-          tabBarStyle: {
-            display: isShowTabBars ? "flex" : "none",
-            paddingHorizontal: 10,
-            marginHorizontal: 20,
-            borderRadius: 20,
-            overflow: 'hidden',
-            borderTopWidth: 0,
-            marginBottom: 10,
-          },
-          tabBarLabelStyle: {
-            fontSize: 12,
-            textAlign: "center"
-          },
-          tabBarIconStyle: {
-            marginBottom: 0,
-          },
-          tabBarActiveTintColor: Colors.light.tabIconSelected, // Màu khi tab được chọn
-          tabBarInactiveTintColor: Colors.light.tabIconDefault // Màu khi tab không được chọn
-        }}>
+          tabBarStyle: shouldHideTabBar ? styles.hiddenTabBar : styles.tabBar,
+          tabBarLabelStyle: styles.tabBarLabel,
+          tabBarIconStyle: styles.tabBarIcon,
+          tabBarActiveTintColor: Colors.light.tabIconSelected,
+          tabBarInactiveTintColor: Colors.light.tabIconDefault,
+        }}
+      >
         <Tabs.Screen
           name="index"
           options={{
@@ -48,9 +30,9 @@ const TabLayout = () => {
           }}
         />
         <Tabs.Screen
-          name="groups"
+          name="accessories"
           options={{
-            tabBarLabel: "Groups",
+            tabBarLabel: "Accessories",
             tabBarIcon: ({ color, size }) => (
               <TabBarIcon name="grid-outline" color={color} size={size} />
             ),
@@ -80,13 +62,30 @@ const TabLayout = () => {
       </Tabs>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     borderTopWidth: 0,
   },
+  tabBar: {
+    display: "flex",
+    paddingHorizontal: 10,
+    marginHorizontal: 20,
+    borderRadius: 20,
+    overflow: "hidden",
+    borderTopWidth: 0,
+    marginBottom: 10,
+  },
+  hiddenTabBar: {
+    display: "none",
+  },
+  tabBarLabel: {
+    fontSize: 12,
+    textAlign: "center",
+  },
+  tabBarIcon: {
+    marginBottom: 0,
+  },
 });
-
-export default TabLayout;

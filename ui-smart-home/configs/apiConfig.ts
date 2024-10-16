@@ -51,7 +51,8 @@ export const API_ENDPOINTS = {
         update: (id: string) => `${GROUPS_BASE}/${id}`,
         detailed: (id: string) => `${GROUPS_BASE}/${id}`,
         delete: (id: string) => `${GROUPS_BASE}/${id}`,
-        update_icon: (id:string) => `${GROUPS_BASE}/${id}/icon`
+        update_icon: (id: string) => `${GROUPS_BASE}/${id}/icon`,
+        get_devices_by_group: (id:string) => `${GROUPS_BASE}/${id}/devices`
     },
     scenes: {
         create: SCENES_BASE,
@@ -59,7 +60,7 @@ export const API_ENDPOINTS = {
         detailed: (id: string) => `${SCENES_BASE}/${id}`,
         update: (id: string) => `${SCENES_BASE}/${id}`,
         delete: (id: string) => `${SCENES_BASE}/${id}`,
-        post: (id: string) => `${SCENES_BASE}/${id}/control`
+        control: (id: string) => `${SCENES_BASE}/${id}/control`
     },
     scenarios: {
         create: SCENARIOS_BASE,

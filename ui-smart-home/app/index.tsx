@@ -1,61 +1,77 @@
-import React, { useEffect } from "react";
-import { View, StyleSheet, ImageBackground, Animated, Image } from "react-native";
-import * as SplashScreen from "expo-splash-screen";
-import { useRouter } from "expo-router";
-import { getAuthToken, isTokenExpired } from "@/services/authService";
-import { Text } from "react-native-paper";
-import  Colors  from '@/constants/Colors'; // Đường dẫn tới file Colors.js
+import { API_ENDPOINTS } from "@/configs/apiConfig";
+import { Colors } from "@/constants/Colors";
+import { getAuthToken, getRefreshToken, isTokenExpired, setAuthToken } from "@/services/authService";
+import { login, logout } from "@/store/slices/authSlice";
+import { AppDispatch } from "@/store/store";
+import axios from "axios";
+import { SplashScreen, useRouter } from "expo-router";
+import { useEffect } from "react";
+import { Animated, Image, ImageBackground, StyleSheet, Text, View } from "react-native";
+import { useDispatch } from "react-redux";
 
-export default function SplashScreenComponent() {
+export default function Index() {
   const router = useRouter();
   const scale = new Animated.Value(0.5);
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     SplashScreen.preventAutoHideAsync();
-    
-    const checkAuth = async () => {
-      try {
-        const token = await getAuthToken();
-        const expired = await isTokenExpired();
+    checkAuthStatus();
 
-        // Tạo hoạt ảnh xuất hiện cho logo
-        Animated.timing(scale, {
-          toValue: 1,
-          duration: 2000,
-          useNativeDriver: true,
-        }).start();
+    Animated.timing(scale, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
-        setTimeout(async () => {
-          if (token && !expired) {
-            router.replace("/(tabs)");
-          } else {
-            router.replace("/login");
-          }
-
-          await SplashScreen.hideAsync();
-        }, 5000);
-      } catch (error) {
-        console.error("Error checking authentication:", error);
-        await SplashScreen.hideAsync();
+  const checkAuthStatus = async () => {
+    try {
+      const [token, refreshToken] = await Promise.all([getAuthToken(), getRefreshToken()]);
+      if (!token) {
+        return router.replace('/login');
       }
-    };
 
-    checkAuth();
-  }, [router]);
+      if (await isTokenExpired()) {
+        return await handleRefreshToken(refreshToken);
+      }
+
+      await handleValidToken(token);
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+      router.replace('/login');
+    } finally {
+      await SplashScreen.hideAsync();
+    }
+  };
+
+  const handleValidToken = async (token: string) => {
+    const userResponse = await axios.get(API_ENDPOINTS.users.current_user, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    dispatch(login({ user: userResponse.data, token }));
+    router.replace('/(tabs)');
+  };
+
+  const handleRefreshToken = async (refreshToken: string | null) => {
+    if (!refreshToken) {
+      dispatch(logout());
+      return router.replace('/login');
+    }
+
+    const response = await axios.post(API_ENDPOINTS.auth.refresh_token, { refreshToken: refreshToken });
+    const { access_token, refresh_token, expireIn } = response.data;
+
+    await setAuthToken(access_token, refresh_token);
+    await handleValidToken(access_token);
+  };
 
   return (
-    <ImageBackground
-      source={require('@/assets/images/splash-screen.jpg')}
-      style={styles.container}
-    >
-      {/* Mờ hình nền */}
+    <ImageBackground source={require("@/assets/images/splash.png")} style={styles.container}>
       <View style={styles.overlay} />
-      
+
       <Animated.View style={{ transform: [{ scale }] }}>
-        <Image
-          source={require('@/assets/images/logo-app.png')}
-          style={styles.logo}
-        />
+        <Image source={require('@/assets/images/logo-app.png')} style={styles.logo} />
         <Text style={styles.title}>SmartHome</Text>
       </Animated.View>
       <Text style={styles.subtitle}>Kết nối dễ dàng, cuộc sống tiện nghi</Text>
@@ -76,7 +92,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: Colors.light.background, // Sử dụng màu nền từ Colors
+    backgroundColor: Colors.light.background,
   },
   logo: {
     width: 150,
@@ -84,12 +100,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 15,
     borderWidth: 2,
-    borderColor: Colors.light.tint, // Sử dụng màu viền từ Colors
+    borderColor: Colors.light.tint,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 5,
@@ -97,15 +110,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: Colors.light.text, // Sử dụng màu chữ từ Colors
+    color: Colors.light.text,
     textAlign: 'center',
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 18,
-    color: Colors.light.text, // Sử dụng màu chữ từ Colors
+    color: Colors.light.text,
     textAlign: 'center',
     marginTop: 10,
   },
 });
-

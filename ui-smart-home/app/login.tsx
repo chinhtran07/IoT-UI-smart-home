@@ -1,93 +1,74 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Alert, Image, ActivityIndicator, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
-import { TextInput, Button, Text } from 'react-native-paper';
-import { useRouter } from 'expo-router';
-import { useAuth } from '@/context/AuthContext';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Colors from '@/constants/Colors';
-import * as Google from "expo-auth-session/providers/google";
-import * as WebBrowser from "expo-web-browser";
+import { API_ENDPOINTS } from "@/configs/apiConfig";
+import { Colors } from "@/constants/Colors";
+import { setAuthToken, setTokenExpiry } from "@/services/authService";
+import { login } from "@/store/slices/authSlice";
+import { AppDispatch } from "@/store/store";
+import axios from "axios";
+import { Link, useRouter } from "expo-router";
+import { useState } from "react";
+import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Text, TextInput, Button } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useDispatch } from "react-redux";
 
 const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validatePassword = (password: string): boolean => password.length >= 6;
 
-WebBrowser.maybeCompleteAuthSession();
+const showAlert = (title: string, message: string) => {
+    Alert.alert(title, message);
+};
 
-
-const LoginScreen: React.FC = () => {
+export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-    const { login } = useAuth();
+    const dispatch = useDispatch<AppDispatch>();
 
     const handleLogin = async () => {
         if (!email || !password) {
-            Alert.alert('Validation Error', 'Please enter both email and password.');
-            return;
+            return showAlert('Validation Error', 'Please enter both email and password.');
         }
         if (!validateEmail(email)) {
-            Alert.alert('Validation Error', 'Please enter a valid email address.');
-            return;
+            return showAlert('Validation Error', 'Please enter a valid email address.');
         }
         if (!validatePassword(password)) {
-            Alert.alert('Validation Error', 'Password must be at least 6 characters long.');
-            return;
+            return showAlert('Validation Error', 'Password must be at least 6 characters long.');
         }
 
-        setLoading(true); // Start loading
+        setLoading(true);
 
         try {
-            await login(email, password);
-            router.replace('/(tabs)');
+            const response = await axios.post(API_ENDPOINTS.auth.login, { email, password });
+
+            const { access_token: token, refresh_token, expireIn } = response.data;
+
+            // Kiểm tra xem các giá trị có tồn tại không
+            if (!token || !refresh_token || !expireIn) {
+                return showAlert('Login Error', 'Failed to retrieve token information.');
+            }
+
+            const userResponse = await axios.get(API_ENDPOINTS.users.current_user, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (userResponse.status === 200) {
+                dispatch(login({ user: userResponse.data, token }));
+                await setAuthToken(token, refresh_token);
+                await setTokenExpiry(expireIn);
+                router.replace('/(tabs)');
+            } else {
+                showAlert('User Error', 'Could not retrieve user information.');
+            }
         } catch (error) {
             console.error(error);
-            Alert.alert('Login Error', 'An error occurred during login. Please try again.');
+            showAlert('Login Error', 'An error occurred during login. Please try again.');
         } finally {
-            setLoading(false); // Stop loading
+            setLoading(false);
         }
     };
-
-    // const handleLoginGoogle = async () => {
-    //     const redirectUri = Google.
-
-    //     const result = await AuthSession.startAsync({
-    //         authUrl: `https://accounts.google.com/o/oauth2/v2/auth?clientid=${process.env.GOOGLE_CLIENTid}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=email%20profile`,
-    //     });
-
-    //     if (result.type === 'success') {
-    //         const { access_token } = result.params;
-
-    //         // Send the token to your backend to authenticate
-    //         try {
-    //             setLoading(true);
-    //             const response = await fetch('YOUR_BACKEND_URL/api/auth/google/callback', {
-    //                 method: 'GET',
-    //                 headers: {
-    //                     Authorization: `Bearer ${access_token}`,
-    //                 },
-    //             });
-
-    //             if (!response.ok) {
-    //                 throw new Error('Failed to login');
-    //             }
-
-    //             const data = await response.json();
-    //             // Handle token and refresh token as needed
-    //             console.log(data);
-    //             // Navigate to your main application screen
-    //             router.replace('/(tabs)');
-    //         } catch (error) {
-    //             console.error(error);
-    //             Alert.alert('Login Error', 'An error occurred during login. Please try again.');
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     } else {
-    //         Alert.alert('Login Cancelled', 'You cancelled the login process.');
-    //     }
-    // };
-
 
 
     return (
@@ -128,7 +109,7 @@ const LoginScreen: React.FC = () => {
                         Login with Google
                     </Button>
                     <Text style={styles.footerText}>
-                        Don't have an account? <Text style={styles.link}>Sign Up</Text>
+                        Don't have an account? <Link href={"/signup"} style={styles.link}>Sign Up</Link>
                     </Text>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -139,7 +120,7 @@ const LoginScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.light.background, // Màu nền từ Colors
+        backgroundColor: 'rgba(240, 240, 240, 1)',
     },
     scrollContent: {
         flexGrow: 1,
@@ -153,7 +134,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         borderRadius: 15,
         borderWidth: 3,
-        borderColor: Colors.light.tint, // Màu viền từ Colors
+        borderColor: Colors.light.tint,
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
@@ -167,11 +148,11 @@ const styles = StyleSheet.create({
         width: '100%',
         marginBottom: 12,
         backgroundColor: '#ffffff',
-        borderColor: Colors.light.tint, // Màu viền từ Colors
+        borderColor: Colors.light.tint,
     },
     button: {
         marginTop: 16,
-        backgroundColor: Colors.light.tint, // Màu chính từ Colors
+        backgroundColor: Colors.light.tint,
         width: '100%',
         padding: 8,
         borderRadius: 8,
@@ -193,9 +174,7 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     link: {
-        color: Colors.light.tint, // Màu từ Colors
+        color: Colors.light.tint,
         fontWeight: 'bold',
     },
 });
-
-export default LoginScreen;

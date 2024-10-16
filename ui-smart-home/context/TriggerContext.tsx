@@ -1,4 +1,3 @@
-// TriggerContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export interface Trigger {
@@ -9,13 +8,14 @@ export interface Trigger {
     deviceId?: string;
     comparator?: string;
     deviceStatus?: any;
+    description?: string;
 }
 
 interface TriggerContextType {
     triggers: Trigger[];
     addTrigger: (trigger: Trigger) => void;
     removeTrigger: (index: number) => void;
-    resetTriggers: () => void; // Thêm phương thức reset
+    resetTriggers: () => void; 
     setTriggers: (trigges: Trigger[]) => void;
 }
 
@@ -33,7 +33,7 @@ export const TriggerProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     const resetTriggers = () => {
-        setTriggers([]); // Đặt triggers về rỗng
+        setTriggers([]); 
     };
 
     return (

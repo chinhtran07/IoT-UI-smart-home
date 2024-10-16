@@ -1,41 +1,25 @@
-const Colors = {
+// Define the primary color for light mode
+const tintColorLight = '#007BFF'; // Bright Blue
+const tintColorDark = '#1F1F1F'; // Dark Gray
+
+export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: '#0a7ea4',
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: '#0a7ea4',
-    headerBackground: '#fff',
-    headerText: '#000',
-    inputBackground: '#fff',
-    inputBorder: '#ccc',
-    deviceItemBackground: '#fff',
-    deviceItemBorder: '#ccc',
-    selectedDeviceBackground: '#e0e0e0',
-    deviceDescription: '#777',
-    saveButton: '#0a7ea4',
+    text: '#212529', // Dark text for better readability
+    background: '#F8F9FA', // Light gray background
+    tint: tintColorLight, // Bright Blue
+    icon: '#343A40', // Dark gray for icons
+    tabIconDefault: '#6C757D', // Gray for default tab icons
+    tabIconSelected: tintColorLight, // Bright Blue for selected tab icons
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: '#fff',
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: '#fff',
-    headerBackground: '#151718',
-    headerText: '#fff',
-    inputBackground: '#222',
-    inputBorder: '#555',
-    deviceItemBackground: '#222',
-    deviceItemBorder: '#555',
-    selectedDeviceBackground: '#333',
-    deviceDescription: '#ccc',
-    saveButton: '#fff',
+    text: '#EAEAEA', // Light text for dark mode
+    background: '#1B1B1B', // Very dark gray background
+    tint: tintColorDark, // Dark Gray
+    icon: '#B0B3B8', // Light gray for icons
+    tabIconDefault: '#6C757D', // Gray for default tab icons
+    tabIconSelected: tintColorDark, // Dark Gray for selected tab icons
   },
-  headerBackground: {
-    color: "#94D9F1"
+  header: {
+    color: "#001F3F"
   }
 };
-
-export default Colors;

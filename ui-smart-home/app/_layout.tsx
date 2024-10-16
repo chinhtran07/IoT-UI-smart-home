@@ -1,32 +1,31 @@
-import { AuthProvider } from "@/context/AuthContext";
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { Provider as ReduxProvider } from "react-redux";
-import { store } from "@/store/store"; // Đảm bảo bạn đã tạo Redux store ở đâu đó
 import { ActionProvider } from "@/context/ActionContext";
+import { QRProvider } from "@/context/QRContext";
 import { TriggerProvider } from "@/context/TriggerContext";
-
-SplashScreen.preventAutoHideAsync();
+import store from "@/store/store";
+import { Stack } from "expo-router";
+import { Provider } from "react-redux";
 
 export default function RootLayout() {
   return (
-    <ReduxProvider store={store}>
-      <AuthProvider>
+    <Provider store={store}>
+      <TriggerProvider>
         <ActionProvider>
-          <TriggerProvider>
-            <Stack>
+          <QRProvider>
+            <Stack initialRouteName="login">
               <Stack.Screen name="index" options={{ headerShown: false }} />
               <Stack.Screen name="login" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="(actions)" options={{ headerShown: false }} />
-              <Stack.Screen name="(devices)" options={{ headerShown: false }} />
-              <Stack.Screen name="(scenarios)" options={{ headerShown: false }} />
-              <Stack.Screen name="(scenes)" options={{ headerShown: false }} />
-              <Stack.Screen name="(triggers)" options={{ headerShown: false }} />
+              <Stack.Screen name="actions" options={{ headerShown: false }} />
+              <Stack.Screen name="devices" options={{ headerShown: false }} />
+              <Stack.Screen name="scenarios" options={{ headerShown: false }} />
+              <Stack.Screen name="scenes" options={{ headerShown: false }} />
+              <Stack.Screen name="triggers" options={{ headerShown: false }} />
+              <Stack.Screen name="groups" options={{ headerShown: false }} />
+              <Stack.Screen name="signup" options={{ headerShown: false }} />
             </Stack>
-          </TriggerProvider>
+          </QRProvider>
         </ActionProvider>
-      </AuthProvider>
-    </ReduxProvider>
+      </TriggerProvider>
+    </Provider>
   );
 }

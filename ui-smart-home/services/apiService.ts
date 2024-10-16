@@ -1,13 +1,16 @@
 import { API_BASE_URL, API_CONFIG } from "@/configs/apiConfig";
 import axios from "axios";
-import { getAuthToken, isTokenExpired } from "./authService";
+import { getAuthToken, removeAuthToken } from "@/services/authService";
+import store from "@/store/store";
 import { logout } from "@/store/slices/authSlice";
+import { navigateToLogin } from "./navigateService";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   ...API_CONFIG,
 });
 
+// Add a request interceptor
 apiClient.interceptors.request.use(
   async (config) => {
     const token = await getAuthToken();
@@ -22,44 +25,26 @@ apiClient.interceptors.request.use(
   }
 );
 
-export const fetchData = async (endpoint: string) => {
-  try {
-    const response = await apiClient.get(endpoint);
-    return response.data;
-  } catch (error) {
-    console.error("API GET Error:", error);
-    throw error;
-  }
-};
+// Add a response interceptor
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    if (error.response && [401, 500].includes(error.response.status)) {
+      await removeAuthToken();
 
-export const postData = async (endpoint: string, data: any) => {
-  try {
-    const response = await apiClient.post(endpoint, data);
-    return response.data;
-  } catch (error) {
-    console.error("API POST Error:", error);
-    throw error;
-  }
-};
+      store.dispatch(logout());
 
-export const updateData = async (endpoint: string, data: any) => {
-  try {
-    const response = await apiClient.put(endpoint, data);
-    return response.data;
-  } catch (error) {
-    console.error("API PUT Error:", error);
-    throw error;
-  }
-};
+      navigateToLogin();
 
-export const deleteData = async (endpoint: string) => {
-  try {
-    const response = await apiClient.delete(endpoint);
-    return response.data;
-  } catch (error) {
-    console.error("API DELETE Error:", error);
-    throw error;
+      console.error("Token expired. Please log in again.");
+      
+      return Promise.reject("Session expired. Please log in again.");
+    }
+
+    return Promise.reject(error);
   }
-};
+);
 
 export default apiClient;
